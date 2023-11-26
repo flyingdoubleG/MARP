@@ -84,6 +84,11 @@ class Story(Environment):
         return False
 
     def _parse_global_designer_output(self, text: str):
+        # global designer output format:
+        # <setting description>
+        # * <Player1>: <description>
+        # * <Player2>: <description>
+        # ...
         player_desc = text.split('* ')[1:]
         designed_players = [desc.split(':')[0] for desc in player_desc]
         descs = [desc.split(':')[1:] for desc in player_desc]
@@ -91,6 +96,7 @@ class Story(Environment):
             player = Player(name=name, role_desc=desc, backend=OpenAIChat())
             self._arena.add_player(player)
             self.player_names.append(name)
+        # return all player settings, which will be added to scene message pool
         return '* ' + ''.join(player_desc)
 
     def _parse_designer_output(self, text: str) -> tuple[str, List[str]]:
@@ -109,7 +115,6 @@ class Story(Environment):
         self._current_turn += 1
         self._current_stage = self._next_stage
         terminal = False
-        print(f"Current stage: {self._current_stage}")
         if self._current_stage == "init":
             player_descs = self._parse_global_designer_output(action)
             message = Message(agent_name=player_name, content=f'Players:\n {player_descs}', turn=self._current_turn)
@@ -128,7 +133,7 @@ class Story(Environment):
         elif self._current_stage == "pick":
             next_player = self._parse_picked_player(action)
             # controller says PLAYER_TERMINAL or max_scene_turns is reached
-            if next_player == PLAYER_TERMINAL or self._current_turn - self._scene_start == self._max_scene_turns:
+            if next_player == PLAYER_TERMINAL or self._current_turn - self._scene_start >= self._max_scene_turns:
                 self._next_stage = "end of scene"
             else:
                 self._next_player_idx = self.player_names.index(next_player)

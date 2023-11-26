@@ -34,7 +34,7 @@ writer = Player(name="Writer", backend=OpenAIChat(),
 players = [controller, global_designer, designer, writer]
 
 
-env = Story(player_names=[p.name for p in players], max_scene_turns=5, max_scenes=3)
+env = Story(player_names=[p.name for p in players], max_scene_turns=10, max_scenes=3)
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)
