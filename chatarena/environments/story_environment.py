@@ -156,8 +156,10 @@ class Story(Environment):
     def check_action(self, action: str, player_name: str) -> bool:
         if "As an AI language model" in action:  # GPT not act as the agent
             return False
-        if player_name == "Controller" and self._parse_picked_player(action) not in self.player_names:
-            return False
+        if player_name == "Controller":
+            picked_player = self._parse_picked_player(action)
+            if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
+                return False
         return True
 
     def to_config(self) -> EnvironmentConfig:

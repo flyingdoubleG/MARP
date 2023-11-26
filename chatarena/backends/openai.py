@@ -25,7 +25,7 @@ else:
 DEFAULT_TEMPERATURE = 1.1
 DEFAULT_MAX_TOKENS = 500
 # DEFAULT_MODEL = "gpt-3.5-turbo"
-DEFAULT_MODEL = "gpt-4-0613"
+DEFAULT_MODEL = "gpt-4-1106-preview"
 
 END_OF_MESSAGE = "<EOS>"  # End of message token specified by us not OpenAI
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
