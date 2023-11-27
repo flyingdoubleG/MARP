@@ -10,6 +10,7 @@ from .backends import IntelligenceBackend, load_backend
 from .message import Message, SYSTEM_NAME
 from .config import AgentConfig, Configurable, BackendConfig
 from datetime import datetime
+import os
 # A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
 # It contains a random UUID string to avoid being exploited by any of the players.
 SIGNAL_END_OF_CONVERSATION = f"<<<<<<END_OF_CONVERSATION>>>>>>{uuid.uuid4()}"
@@ -220,8 +221,9 @@ class Writer(Player):
             response = SIGNAL_END_OF_CONVERSATION + err_msg
 
         # Save the written story to a local txt file.
-        
-        with open(f"story/story_{self.timestamp}.txt", "a+") as file:
+        if not os.path.exists('storys'):
+            os.makedirs('storys')
+        with open(f"storys/story_{self.timestamp}.txt", "a+") as file:
             file.write(response)
 
         return response
