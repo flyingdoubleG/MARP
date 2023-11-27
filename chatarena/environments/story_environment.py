@@ -1,5 +1,5 @@
 import random
-from typing import List, Union
+from typing import List, Union, Tuple
 
 from chatarena.backends import OpenAIChat
 from chatarena.config import EnvironmentConfig
@@ -99,7 +99,7 @@ class Story(Environment):
         # return all player settings, which will be added to scene message pool
         return '* ' + ''.join(player_desc)
 
-    def _parse_designer_output(self, text: str) -> tuple[str, List[str]]:
+    def _parse_designer_output(self, text: str) -> Tuple[str, List[str]]:
         setting, players = text.split('### Next up: ')
         return setting, players.split(', ')
 
@@ -112,7 +112,6 @@ class Story(Environment):
             return random.choice(self.player_names)
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        self._current_turn += 1
         self._current_stage = self._next_stage
         terminal = False
         if self._current_stage == "init":
@@ -125,7 +124,7 @@ class Story(Environment):
             # add setting to scene message pool
             message = Message(agent_name=player_name, content=setting, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
-            # add players pf current scene
+            # add players of current scene
             message = Message(agent_name=player_name, content=f"Players in this scene: {', '.join(players)}", turn=self._current_turn)
             self.scene_message_pool.append_message(message)
             self._scene_start = self._current_turn
