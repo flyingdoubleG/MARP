@@ -9,7 +9,7 @@ import asyncio
 from .backends import IntelligenceBackend, load_backend
 from .message import Message, SYSTEM_NAME
 from .config import AgentConfig, Configurable, BackendConfig
-
+from datetime import datetime
 # A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
 # It contains a random UUID string to avoid being exploited by any of the players.
 SIGNAL_END_OF_CONVERSATION = f"<<<<<<END_OF_CONVERSATION>>>>>>{uuid.uuid4()}"
@@ -192,20 +192,36 @@ class Moderator(Player):
             return False
 
 
-class Controller(Player):
+class Writer(Player):
 
     def __init__(self, name: str, role_desc: str, backend: Union[BackendConfig, IntelligenceBackend],
                  global_prompt: str = None, **kwargs):
+        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         super().__init__(name, role_desc, backend, global_prompt, **kwargs)
 
     def act(self, observation: List[Message]) -> str:
-        return super().act(observation)
+        """
+        Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
 
-    def __call__(self, observation: List[Message]) -> str:
-        return super().__call__(observation)
+        Parameters:
+            observation (List[Message]): The messages that the player has observed from the environment.
 
-    async def async_act(self, observation: List[Message]) -> str:
-        return await super().async_act(observation)
+        Returns:
+            str: The action (response) of the player.
+        """
+        
+        try:
+            response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
+                                          history_messages=observation, global_prompt=self.global_prompt,
+                                          request_msg=None)
+        except RetryError as e:
+            err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
+            logging.warning(err_msg)
+            response = SIGNAL_END_OF_CONVERSATION + err_msg
 
-    def reset(self):
-        super().reset()
+        # Save the written story to a local txt file.
+        
+        with open(f"story/story_{self.timestamp}.txt", "a+") as file:
+            file.write(response)
+
+        return response
