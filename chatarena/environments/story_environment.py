@@ -143,8 +143,6 @@ class Story(Environment):
             self._next_stage = "pick"
         elif self._current_stage == "end of scene": 
             assert player_name == "Writer", "Writer writes the story"
-            message = Message(agent_name=player_name, content=action, turn=self._current_turn)
-            self.global_message_pool.append_message(message)
             self._current_scene += 1
             self._next_stage = "scene_init"
         terminal = terminal or self.is_terminal()

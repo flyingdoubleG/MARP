@@ -163,3 +163,5 @@ cython_debug/
 hf-spaces/
 etc/
 .conda
+
+storys/

@@ -1,14 +1,14 @@
 import json
 
-from chatarena.agent import Player, Controller
+from chatarena.agent import Player, Writer
 from chatarena.backends import OpenAIChat
 from chatarena.environments import Story
 from chatarena.arena import Arena
 
 environment_description = "You are in a house in the winter countryside with no people around."
-controller = Controller(name="Controller", backend=OpenAIChat(),
+controller = Player(name="Controller", backend=OpenAIChat(),
                         role_desc="You are the scene coordinator of a popular play. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: 'Next: Amy' or 'Next: Sheldon'. If you think the scene should end, then print 'Next: END'.",
-                        global_prompt="The players are Annie and Sheldon. If no previous rounds are provided, generate the first player on stage.")
+                        global_prompt=environment_description)
 global_designer = Player(name="Global designer", backend=OpenAIChat(),
                   role_desc=f'''You are the designer of a popular play. Your job is to design a global setting for this play. The topic of your play is '{environment_description}'. Please compose a setting that elaborate more details about the background, and design the characters in this setting. For example, a valid output is:
 \'Situated in the midst of a frosted winter landscape, stands a solemn, charming, two-story countryside house, blanketed calmly by the freshly-fallen snow reflectively glowing under the moonlight.
@@ -27,8 +27,8 @@ designer = Player(name="Designer", backend=OpenAIChat(),
 # player2 = Player(name="Annie", backend=OpenAIChat(),
 #                  role_desc="You're a nurse with a penchant for murder and you are also an avid fan of Sheldon's books. When you learn that Sheldon has written the death of your favorite fictional character, Bitter, you imprison Sheldon in your own home and push him to write a book to keep Bitter alive.",
 #                  global_prompt=environment_description)
-writer = Player(name="Writer", backend=OpenAIChat(),
-                 role_desc="You're the writer of a popular play. Your job is to write the play given several rounds of previous conversation between the characters.",
+writer = Writer(name="Writer", backend=OpenAIChat(max_tokens=4096),
+                 role_desc="Given several rounds of prior dialogue between characters in the scene, your role is to faithfully construct a narrative for a popular play, seamlessly integrating the existing conversations into the storyline. DON'T violate any factual occurrences in the conversations, but you can appropriately add embellishments. DON'T say you are a writer.",
                  global_prompt=environment_description)
 
 players = [controller, global_designer, designer, writer]
