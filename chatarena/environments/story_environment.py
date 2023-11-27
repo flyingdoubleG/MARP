@@ -105,7 +105,7 @@ class Story(Environment):
 
     def _parse_picked_player(self, text: str) -> str:
         try:
-            name = text.split('Next: ')[1].split('.')[0]
+            name = text.split('Next up: ')[1]
             return name
         except IndexError:
             print(f'WARNING using random player')

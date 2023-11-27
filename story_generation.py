@@ -5,9 +5,9 @@ from chatarena.backends import OpenAIChat
 from chatarena.environments import Story
 from chatarena.arena import Arena
 
-environment_description = "You are in a house in the winter countryside with no people around."
+environment_description = "You are in a scary house in the winter countryside with no people around."
 controller = Player(name="Controller", backend=OpenAIChat(),
-                        role_desc="You are the scene coordinator of a popular play. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: 'Next: Amy' or 'Next: Sheldon'. If you think the scene should end, then print 'Next: END'.",
+                        role_desc="You are the scene coordinator of a popular play. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: 'Next up: Amy' or 'Next up: Sheldon'. If you think the scene should end, then print 'Next up: END'.",
                         global_prompt=environment_description)
 global_designer = Player(name="Global designer", backend=OpenAIChat(),
                   role_desc=f'''You are the designer of a popular play. Your job is to design a global setting for this play. The topic of your play is '{environment_description}'. Please compose a setting that elaborate more details about the background, and design the characters in this setting. For example, a valid output is:
