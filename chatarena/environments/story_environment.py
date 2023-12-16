@@ -27,7 +27,6 @@ class Story(Environment):
         self._scene_start = 0  # turn where current scene starts
         self._next_player_idx = 0
         self._arena = None
-        self.DESIGNERS = ["Designer", "Global designer"]
 
     def set_arena(self, arena):
         self._arena = arena
@@ -46,6 +45,8 @@ class Story(Environment):
             return "Designer"
         elif self._next_stage == "pick":
             return "Controller"
+        elif self._next_stage == "impact":
+            return "Environment manager"
         elif self._next_stage == "end of scene":
             return "Writer"
         else:
@@ -138,9 +139,13 @@ class Story(Environment):
                 self._next_player_idx = self.player_names.index(next_player)
                 self._next_stage = "act"
         elif self._current_stage == "act":
+            # message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+            # self.scene_message_pool.append_message(message)
+            self._next_stage = "impact"
+        elif self._current_stage == "impact":
+            self._next_stage = "pick"
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
-            self._next_stage = "pick"
         elif self._current_stage == "end of scene": 
             assert player_name == "Writer", "Writer writes the story"
             self._current_scene += 1
