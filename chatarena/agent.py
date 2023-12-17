@@ -230,6 +230,7 @@ class Writer(Player):
             action_prompt += f" Also, please make sure that this scene can be concatenated directly to the following scene."
         else:
             action_prompt += f" Also, please make sure that this scene can be concatenated directly to the previous scene and the following scene."
+
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
