@@ -65,6 +65,7 @@ class Player(Agent):
         assert name != SYSTEM_NAME, f"Player name cannot be {SYSTEM_NAME}, which is reserved for the system."
 
         # Register the fields in the _config
+        self.scene_num = 0
         super().__init__(name=name, role_desc=role_desc, backend=backend_config,
                          global_prompt=global_prompt, **kwargs)
 
@@ -104,7 +105,10 @@ class Player(Agent):
     def __call__(self, observation: List[Message], 
                  action_prompt="Now you speak and act") -> str:
         if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Environment manager"}:
-            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences"
+            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
+        elif self.name == "Designer":
+            self.scene_num += 1
+            action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
         return self.act(observation, action_prompt)
 
     async def async_act(self, observation: List[Message]) -> str:
@@ -217,7 +221,9 @@ class Writer(Player):
             str: The action (response) of the player.
         """
         
-        action_prompt = "Now please write the story in Chinese based on the settings and conversations. Please make sure to not make the story read like a summary. Make it read like a real vivid story"
+        action_prompt = "Now please write the story in Chinese based on the settings and conversations. Please make sure to not make the story read like a summary. Make it read like a real vivid story."
+        if self.scene_num > 1:
+            action_prompt += f" Also, please make sure to make the story of this scene transition smoothly from the previous scenes."
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
