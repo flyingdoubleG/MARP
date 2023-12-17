@@ -8,8 +8,8 @@ from chatarena.arena import Arena
 
 DEFAULT_MAX_TOKENS = 4096
 
-# environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a desperate and dangerous situation as the Hosso Union approaches its capital, Zaragoza."
-environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
+environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a desperate and dangerous situation as the Hosso Union approaches its capital, Zaragoza."
+# environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 controller = Player(name="Controller", backend=OpenAIChat(),
                         role_desc="You are the scene coordinator of a story. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: '### Next up: Amy' or '### Next up: Sheldon'. If you think the scene should end, then print '### Next up: END'.",
                         global_prompt=environment_description)
