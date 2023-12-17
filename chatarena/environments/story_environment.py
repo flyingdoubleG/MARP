@@ -112,10 +112,10 @@ class Story(Environment):
         return setting, players.split(', ')
 
     def _parse_picked_player(self, text: str) -> str:
-        try:
             name = text.split('Next up: ')[1]
-            return name
-        except IndexError:
+            for player_name in self.player_names:
+                if name in player_name:
+                    return player_name
             print(f'WARNING using random player')
             return random.choice(self.player_names)
 
