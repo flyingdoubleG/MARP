@@ -145,6 +145,7 @@ class Story(Environment):
             setting, players = self._parse_designer_output(action)
             # add setting to scene message pool
             message = Message(agent_name=player_name, content=setting, turn=self._current_turn)
+            self.scene_message_pool.reset()
             self.scene_message_pool.append_message(message)
             # add players of current scene
             message = Message(agent_name=player_name, content=f"Players in this scene: {', '.join(players)}", turn=self._current_turn)
