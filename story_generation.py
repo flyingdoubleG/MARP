@@ -5,7 +5,7 @@ from chatarena.backends import OpenAIChat
 from chatarena.environments import Story
 from chatarena.arena import Arena
 
-environment_description = "You are in a scary house in the winter countryside with no people around."
+environment_description = "The kingdom of Ibrusia is coming to a desperate and dangerous situation as its enemy approaches the capital, Zaragoza."
 controller = Player(name="Controller", backend=OpenAIChat(),
                         role_desc="You are the scene coordinator of a popular play. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: 'Next up: Amy' or 'Next up: Sheldon'. If you think the scene should end, then print 'Next up: END'.",
                         global_prompt=environment_description)
@@ -21,17 +21,15 @@ designer = Player(name="Designer", backend=OpenAIChat(),
 ### Next up: Brookelynn, Elliot\'
 \'The current scene is set predominantly in the grand drawing room, illuminated merely by the soft, flickering light of the sprawling hearth. Sebastian continues to weave notes into the cold winter air with the empathic tone of his guitar. The expansive Polaroid-covered walls bear silent witness, marking segments of embroidered history. 
 ### Next up: Winters, George\'''')
-# player1 = Player(name="Sheldon", backend=OpenAIChat(),
-#                  role_desc="You are a writer who has published many famous books and has many fans. You are thoughtful and friendly, and you love to read and write in general. You were saved by Annie and brought to her house after a car accident. Your leg was broken in a car accident and you need to be in a wheelchair.",
-#                  global_prompt=environment_description)
-# player2 = Player(name="Annie", backend=OpenAIChat(),
-#                  role_desc="You're a nurse with a penchant for murder and you are also an avid fan of Sheldon's books. When you learn that Sheldon has written the death of your favorite fictional character, Bitter, you imprison Sheldon in your own home and push him to write a book to keep Bitter alive.",
-#                  global_prompt=environment_description)
 writer = Writer(name="Writer", backend=OpenAIChat(max_tokens=4096),
                  role_desc="Given several rounds of prior dialogue between characters in the scene, your role is to faithfully construct a narrative for a popular play, seamlessly integrating the existing conversations into the storyline. DON'T violate any factual occurrences in the conversations, but you can appropriately add embellishments. DON'T say you are a writer.",
                  global_prompt=environment_description)
-
-players = [controller, global_designer, designer, writer]
+env_manager = Player(name="Environment manager", backend=OpenAIChat(),
+                     role_desc='''You are reading the script a popular play. In order to facilitate future reading, your job is to conclude each act of a player into a sentence. Only include critical information such as the actions of the player and their impacts, the emotion of the player, the change in the player's opinion or plan, etc. Your input Your output should follow the format of: ### Summary: <your summary>
+Here are some examples you've previously written, follow this pattern and keep up the good work: 
+Act: [Brandon]: Seated at an oak table laden with books and parchment, Brandon is the image of scholarly dedication, with a quill tucked behind one ear. The warm glow of a candle illuminates his focused expression, as he writes furiously, occasionally stopping to consult a large, leather-bound tome.
+### Summary: Brandon is composing a large tome at an oak table by a candle. He is dedicated.''')
+players = [controller, global_designer, designer, writer, env_manager]
 
 
 env = Story(player_names=[p.name for p in players], max_scene_turns=10, max_scenes=3)
