@@ -47,7 +47,7 @@ class Story(Environment):
         elif self._next_stage == "pick":
             return "Controller"
         elif self._next_stage == "impact":
-            return "Environment manager"
+            return "Summarizer"
         elif self._next_stage == "end of scene":
             return "Writer"
         else:
@@ -56,7 +56,7 @@ class Story(Environment):
     def get_observation(self, player_name=None) -> List[Message]:
         if player_name is None:
             return self.scene_message_pool.get_all_messages()
-        elif player_name == 'Environment manager':
+        elif player_name == 'Summarizer':
             temp_message_pool = self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
                 self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
             temp_message_pool.append(self._current_act)
@@ -78,6 +78,7 @@ class Story(Environment):
         check if the conversation is over
         """
         if self._current_scene == self._max_scenes:
+            print(self._current_scene, self._max_scenes)
             return True
         # If the last message is the signal, then the conversation is over
         if self.scene_message_pool.last_message is None:
@@ -107,9 +108,12 @@ class Story(Environment):
         return '* ' + ''.join(player_desc)
 
     def _parse_designer_output(self, text: str) -> Tuple[str, List[str]]:
-        pass
-        setting, players = text.split('### Next up: ')
-        return setting, players.split(', ')
+        try:
+            setting, players = text.split('### Next up: ')
+            return setting, players.split(', ')
+        except ValueError:
+            print('WARNING designer wrong format, using all players')
+            return text, self.player_names
 
     def _parse_picked_player(self, text: str) -> str:
             name = text.split('Next up: ')[1]
@@ -118,7 +122,7 @@ class Story(Environment):
             for player_name in self.player_names:
                 if name in player_name:
                     return player_name
-            print(f'WARNING using random player')
+            print(f'WARNING using random player, all available players are {self.player_names}')
             return random.choice(self.player_names)
 
     def _parse_env_manager_output(self, text: str) -> str:
@@ -141,6 +145,7 @@ class Story(Environment):
             setting, players = self._parse_designer_output(action)
             # add setting to scene message pool
             message = Message(agent_name=player_name, content=setting, turn=self._current_turn)
+            self.scene_message_pool.reset()
             self.scene_message_pool.append_message(message)
             # add players of current scene
             message = Message(agent_name=player_name, content=f"Players in this scene: {', '.join(players)}", turn=self._current_turn)
@@ -158,15 +163,14 @@ class Story(Environment):
         elif self._current_stage == "act":
             # message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             # self.scene_message_pool.append_message(message)
-            self._current_act = Message(agent_name=player_name, content=f'Act: {action}', turn=self._current_turn)
+            self._current_act = Message(agent_name=player_name, content=f'The act you summarize: [{player_name}]: {action}', turn=self._current_turn)
             self._next_stage = "impact"
         elif self._current_stage == "impact":
             self._next_stage = "pick"
             action = self._parse_env_manager_output(action)
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
-        elif self._current_stage == "end of scene": 
-            assert player_name == "Writer", "Writer writes the story"
+        elif self._current_stage == "end of scene":
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.global_message_pool.append_message(message)
             self._current_scene += 1
