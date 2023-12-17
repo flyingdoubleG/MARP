@@ -242,6 +242,8 @@ class Writer(Player):
             self.scene_num += 1
             file.write(response)
             file.write("\n")
+        if not os.path.exists('storys/logs'):
+            os.makedirs('storys/logs')
         with open(f"storys/logs/log_{self.timestamp}.txt", "a+") as file:
             for obs in observation:
                 file.write(obs.__str__() + '\n')
