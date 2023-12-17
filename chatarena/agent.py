@@ -223,7 +223,7 @@ class Writer(Player):
         
         action_prompt = "Now please write the story in Chinese based on the settings and conversations. Please make sure to not make the story read like a summary. Make it read like a real vivid story."
         if self.scene_num > 1:
-            action_prompt += f" Also, please make sure to make the story of this scene transition smoothly from the previous scenes."
+            action_prompt += f" Also, please don't repeat what you have written for the previous scene at all."
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,

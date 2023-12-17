@@ -8,7 +8,7 @@ from chatarena.arena import Arena
 
 DEFAULT_MAX_TOKENS = 4096
 
-environment_description = "A Quarrel between two good friends about Iron Man. The story happens in two completely different settings."
+environment_description = "A story about conflict as work and resolution. The story happens in two completely different settings."
 controller = Player(name="Controller", backend=OpenAIChat(),
                         role_desc="You are the scene coordinator of a story. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: '### Next up: Amy' or '### Next up: Sheldon'. If you think the scene should end, then print '### Next up: END'.",
                         global_prompt=environment_description)
@@ -25,7 +25,7 @@ designer = Player(name="Designer", backend=OpenAIChat(),
 \'The current scene is set in the grand drawing room. 
 ### Next up: Jane, George\'''', global_prompt= environment_description)
 writer = Writer(name="Writer", backend=OpenAIChat(max_tokens=DEFAULT_MAX_TOKENS),
-                 role_desc="Given several rounds of prior dialogue between characters in the scene, your role is to write an engaging and readable story, by converting the conversations into a story. Note that you should try to keep as much conversation in the story as possible. Don't make the story read like a summary. When crafting the story, please respect the contents of the provided conversations and in the mean time make the story coherent. You can add some embellishments, but don't be verbose. The most important thing is to keep important conversations, make the story read like a story, while respecting the truthfulness of the provided conversations, i.e. readable and interesting. DON'T say you are a writer.",
+                 role_desc="Given several rounds of prior dialogue between characters in the scene, your role is to write an engaging scene, by converting the conversations into a story. Note that you should try to keep as much conversation in the story as possible. Don't make the story read like a summary. When crafting the story, please respect the contents of the provided conversations and in the mean time make the story coherent. You can add some embellishments, but don't be verbose. The most important thing is to keep important conversations, make the story read like a story, while respecting the truthfulness of the provided conversations, i.e. readable and interesting. DON'T say you are a writer.",
                  global_prompt= environment_description)
 env_manager = Player(name="Environment manager", backend=OpenAIChat(),
                      role_desc='''You are reading the script a popular play. In order to facilitate future reading, your job is to conclude each act of a player into a sentence. Only include critical information such as the actions of the player and their impacts, the emotion of the player, the change in the player's opinion or plan, etc. Your input Your output should follow the format of: ### Summary: <your summary>
@@ -36,7 +36,7 @@ Act: [Brandon]: Seated at an oak table laden with books and parchment, Brandon i
 players = [controller, global_designer, designer, writer, env_manager]
 
 
-env = Story(player_names=[p.name for p in players], max_scene_turns=20, max_scenes=2)
+env = Story(player_names=[p.name for p in players], max_scene_turns=30, max_scenes=2)
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)
