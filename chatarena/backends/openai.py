@@ -138,7 +138,7 @@ class OpenAIChat(IntelligenceBackend):
                     else:
                         raise ValueError(f"Invalid role: {messages[-1]['role']}")
         # pdb.set_trace()
-        # print("[MESSAGES]: ", messages)
+        print("[MESSAGES]: ", messages)
         response = self._get_response(messages, *args, **kwargs)
 
         # Remove the agent name if the response starts with it

@@ -65,7 +65,7 @@ class Player(Agent):
         assert name != SYSTEM_NAME, f"Player name cannot be {SYSTEM_NAME}, which is reserved for the system."
 
         # Register the fields in the _config
-        self.scene_num = 0
+        self.scene_num = 1
         super().__init__(name=name, role_desc=role_desc, backend=backend_config,
                          global_prompt=global_prompt, **kwargs)
 
@@ -90,7 +90,16 @@ class Player(Agent):
         Returns:
             str: The action (response) of the player.
         """
-        
+        if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Summarizer"}:
+            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
+        elif self.name == "Designer":
+            action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
+        elif self.name == "Global designer":
+            action_prompt = "Now please design"
+        elif self.name == 'Summarizer':
+            action_prompt = "Now please summarize"
+        elif self.name == "Controller":
+            action_prompt = "Now please select a player"
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
@@ -99,16 +108,11 @@ class Player(Agent):
             err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
             logging.warning(err_msg)
             response = SIGNAL_END_OF_CONVERSATION + err_msg
-
+        self.scene_num += 1
         return response
 
     def __call__(self, observation: List[Message], 
                  action_prompt="Now you speak and act") -> str:
-        if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Environment manager"}:
-            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
-        elif self.name == "Designer":
-            self.scene_num += 1
-            action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
         return self.act(observation, action_prompt)
 
     async def async_act(self, observation: List[Message]) -> str:
@@ -209,7 +213,7 @@ class Writer(Player):
         self.scene_num = 1
         super().__init__(name, role_desc, backend, global_prompt, **kwargs)
 
-    def act(self, observation: List[Message], 
+    def act(self, observation: List[Message],
             action_prompt="Now you speak and act") -> str:
         """
         Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
@@ -221,9 +225,11 @@ class Writer(Player):
             str: The action (response) of the player.
         """
         
-        action_prompt = "Now please write the story in Chinese based on the settings and conversations. Please make sure to not make the story read like a summary. Make it read like a real vivid story."
-        if self.scene_num > 1:
-            action_prompt += f" Also, please make sure to make the story of this scene transition smoothly from the previous scenes."
+        action_prompt = f"Now please write scene {self.scene_num} of the story in Chinese based on the settings and conversations."
+        if self.scene_num == 1:
+            action_prompt += f" Also, please make sure that this scene can be concatenated directly to the following scene."
+        else:
+            action_prompt += f" Also, please make sure that this scene can be concatenated directly to the previous scene and the following scene."
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
@@ -233,12 +239,11 @@ class Writer(Player):
             err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
             logging.warning(err_msg)
             response = SIGNAL_END_OF_CONVERSATION + err_msg
-
+        response = f'\nScene {self.scene_num}: \n' + response
         # Save the written story to a local txt file.
         if not os.path.exists('storys'):
             os.makedirs('storys')
         with open(f"storys/story_{self.timestamp}.txt", "a+") as file:
-            file.write(f'\nScene {self.scene_num}\n')
             self.scene_num += 1
             file.write(response)
             file.write("\n")
