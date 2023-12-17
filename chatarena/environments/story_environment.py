@@ -123,7 +123,7 @@ class Story(Environment):
 
     def _parse_env_manager_output(self, text: str) -> str:
         try:
-            summary = text.split('### Summary: ')[1]
+            summary = text.split('### Summary:')[1]
             return summary
         except IndexError:
             print(f'WARNING env manager output format error')
