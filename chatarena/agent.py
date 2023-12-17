@@ -225,7 +225,7 @@ class Writer(Player):
             str: The action (response) of the player.
         """
         
-        action_prompt = f"Now please write scene {self.scene_num} of the story in Chinese based on the settings and conversations."
+        action_prompt = f"Now please write scene {self.scene_num} of the story based on the settings and conversations."
         if self.scene_num == 1:
             action_prompt += f" Also, please make sure that this scene can be concatenated directly to the following scene."
         else:

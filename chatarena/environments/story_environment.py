@@ -104,7 +104,7 @@ class Story(Environment):
         for name, desc in zip(designed_players, descs):
             player = Player(name=name, role_desc=desc, backend=OpenAIChat())
             self._arena.add_player(player)
-            self._role_list.append(player)
+            self._role_list.append(name)
             self.player_names.append(name)
         # return all player settings, which will be added to scene message pool
         return '* ' + ''.join(player_desc)
