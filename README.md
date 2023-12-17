@@ -4,7 +4,7 @@
     <p>Multi-Agent Story Generation</p>
 </h3>
 
-MARP is a Story Generation Framework based on multi-agent collaboration and role-playing. Agents include Controller, Global designer, Scene designer, Character, Environment Manager, Writer.
+MARP is a Story Generation Framework based on multi-agent collaboration and role-playing. Agents include Global designer, Scene designer, Controller, Character, Environment Manager, Writer.
 
 ## Getting Started
 
