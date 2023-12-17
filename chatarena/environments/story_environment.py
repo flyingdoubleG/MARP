@@ -113,6 +113,8 @@ class Story(Environment):
 
     def _parse_picked_player(self, text: str) -> str:
             name = text.split('Next up: ')[1]
+            if name == PLAYER_TERMINAL:
+                return PLAYER_TERMINAL
             for player_name in self.player_names:
                 if name in player_name:
                     return player_name
