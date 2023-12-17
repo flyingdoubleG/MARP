@@ -8,7 +8,7 @@ from chatarena.arena import Arena
 
 DEFAULT_MAX_TOKENS = 4096
 
-environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a desperate and dangerous situation as the Hosso Union approaches its capital, Zaragoza."
+environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a huge economic recession, and people all actinb in panic in a turmoil."
 # environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 
 controller = Player(name="Controller", backend=OpenAIChat(),

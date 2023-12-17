@@ -28,6 +28,7 @@ class Story(Environment):
         self._next_player_idx = 0
         self._arena = None
         self._current_act = Message('', '', -1)
+        self._role_list = []
 
     def set_arena(self, arena):
         self._arena = arena
@@ -103,6 +104,7 @@ class Story(Environment):
         for name, desc in zip(designed_players, descs):
             player = Player(name=name, role_desc=desc, backend=OpenAIChat())
             self._arena.add_player(player)
+            self._role_list.append(player)
             self.player_names.append(name)
         # return all player settings, which will be added to scene message pool
         return '* ' + ''.join(player_desc)
@@ -122,8 +124,8 @@ class Story(Environment):
             for player_name in self.player_names:
                 if name in player_name:
                     return player_name
-            print(f'WARNING using random player, all available players are {self.player_names}')
-            return random.choice(self.player_names)
+            print(f'WARNING using random player, all available players are {self._role_list}')
+            return random.choice(self._role_list)
 
     def _parse_env_manager_output(self, text: str) -> str:
         try:
