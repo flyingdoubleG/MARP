@@ -107,6 +107,7 @@ class Story(Environment):
         return '* ' + ''.join(player_desc)
 
     def _parse_designer_output(self, text: str) -> Tuple[str, List[str]]:
+        pass
         setting, players = text.split('### Next up: ')
         return setting, players.split(', ')
 

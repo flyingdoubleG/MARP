@@ -23,9 +23,13 @@ else:
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 1.1
-DEFAULT_MAX_TOKENS = 1000
+# DEFAULT_MAX_TOKENS = 500
+DEFAULT_MAX_TOKENS = 4096
 # DEFAULT_MODEL = "gpt-3.5-turbo"
+# DEFAULT_MODEL = "gpt-4-0613"
 DEFAULT_MODEL = "gpt-4-1106-preview"
+# DEFAULT_MODEL = "gpt-4-vision-preview"
+
 
 END_OF_MESSAGE = "<EOS>"  # End of message token specified by us not OpenAI
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
@@ -73,7 +77,8 @@ class OpenAIChat(IntelligenceBackend):
         return response
 
     def query(self, agent_name: str, role_desc: str, history_messages: List[Message], global_prompt: str = None,
-              request_msg: Message = None, *args, **kwargs) -> str:
+              request_msg: Message = None, 
+              action_prompt="Now you speak and act", *args, **kwargs) -> str:
         """
         format the input and call the ChatGPT/GPT-4 API
         args:
@@ -103,7 +108,13 @@ class OpenAIChat(IntelligenceBackend):
         if request_msg:
             all_messages.append((SYSTEM_NAME, request_msg.content))
         else:  # The default request message that reminds the agent its role and instruct it to speak
-            all_messages.append((SYSTEM_NAME, f"Now you speak and act, {agent_name}.{END_OF_MESSAGE}"))
+            # all_messages.append((SYSTEM_NAME, f"{action_prompt}, {agent_name} {END_OF_MESSAGE}"))
+
+            # all_messages.append((SYSTEM_NAME, f"Now you speak and act, {agent_name}.{END_OF_MESSAGE}"))
+
+            all_messages.append((SYSTEM_NAME, f"You are {agent_name}. {action_prompt}.{END_OF_MESSAGE}"))
+
+            # all_messages.append((SYSTEM_NAME, f"Now you can speak and act. please try to limit your speak and act content to be fewer than 5 sentences.{END_OF_MESSAGE}"))
 
         messages = []
         for i, msg in enumerate(all_messages):
