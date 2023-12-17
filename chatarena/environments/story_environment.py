@@ -27,6 +27,7 @@ class Story(Environment):
         self._scene_start = 0  # turn where current scene starts
         self._next_player_idx = 0
         self._arena = None
+        self._current_act = Message('', '', -1)
 
     def set_arena(self, arena):
         self._arena = arena
@@ -55,6 +56,11 @@ class Story(Environment):
     def get_observation(self, player_name=None) -> List[Message]:
         if player_name is None:
             return self.scene_message_pool.get_all_messages()
+        elif player_name == 'Environment manager':
+            temp_message_pool = self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
+                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
+            temp_message_pool.append(self._current_act)
+            return temp_message_pool
         else:
             return self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
                 self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
@@ -112,6 +118,14 @@ class Story(Environment):
             print(f'WARNING using random player')
             return random.choice(self.player_names)
 
+    def _parse_env_manager_output(self, text: str) -> str:
+        try:
+            summary = text.split('### Summary: ')[1]
+            return summary
+        except IndexError:
+            print(f'WARNING env manager output format error')
+            return text
+
     def step(self, player_name: str, action: str) -> TimeStep:
         self._current_stage = self._next_stage
         terminal = False
@@ -141,9 +155,11 @@ class Story(Environment):
         elif self._current_stage == "act":
             # message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             # self.scene_message_pool.append_message(message)
+            self._current_act = Message(agent_name=player_name, content=f'Act: {action}', turn=self._current_turn)
             self._next_stage = "impact"
         elif self._current_stage == "impact":
             self._next_stage = "pick"
+            action = self._parse_env_manager_output(action)
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
         elif self._current_stage == "end of scene": 
