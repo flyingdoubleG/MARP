@@ -50,6 +50,17 @@ class Message:
         # Generate a unique message id given the content, timestamp and role
         return _hash(
             f"agent: {self.agent_name}\ncontent: {self.content}\ntimestamp: {str(self.timestamp)}\nturn: {self.turn}\nmsg_type: {self.msg_type}")
+    
+    def __str__(self):
+        visible_to_str = self.visible_to if isinstance(self.visible_to, str) else ', '.join(self.visible_to)
+        return (
+            f"Message("
+            f"Turn: {self.turn}. "
+            f"  Agent Name: {self.agent_name} -> "
+            f"  Visible To: {visible_to_str}: "
+            f"  Content: {self.content}\n"
+            f")"
+        )
 
 
 class MessagePool():
@@ -90,6 +101,9 @@ class MessagePool():
         """
         for message in self._messages:
             print(f"[{message.agent_name}->{message.visible_to}]: {message.content}")
+
+    def __str__(self):
+        return '\n'.join([str(message) for message in self._messages])
 
     @property
     def last_turn(self):

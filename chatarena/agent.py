@@ -78,7 +78,8 @@ class Player(Agent):
             global_prompt=self.global_prompt,
         )
 
-    def act(self, observation: List[Message]) -> str:
+    def act(self, observation: List[Message], 
+            action_prompt="Now you speak and act") -> str:
         """
         Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
 
@@ -92,7 +93,7 @@ class Player(Agent):
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
-                                          request_msg=None)
+                                          request_msg=None, action_prompt=action_prompt)
         except RetryError as e:
             err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
             logging.warning(err_msg)
@@ -100,8 +101,11 @@ class Player(Agent):
 
         return response
 
-    def __call__(self, observation: List[Message]) -> str:
-        return self.act(observation)
+    def __call__(self, observation: List[Message], 
+                 action_prompt="Now you speak and act") -> str:
+        if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Environment manager"}:
+            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences"
+        return self.act(observation, action_prompt)
 
     async def async_act(self, observation: List[Message]) -> str:
         """
@@ -200,7 +204,8 @@ class Writer(Player):
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         super().__init__(name, role_desc, backend, global_prompt, **kwargs)
 
-    def act(self, observation: List[Message]) -> str:
+    def act(self, observation: List[Message], 
+            action_prompt="Now you speak and act") -> str:
         """
         Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
 
@@ -211,10 +216,12 @@ class Writer(Player):
             str: The action (response) of the player.
         """
         
+        action_prompt = "Now please write the story in Chinese based on the settings and conversations. Please make sure to not make the story read like a summary. Make it read like a real vivid story"
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
-                                          request_msg=None)
+                                          request_msg=None,
+                                          action_prompt=action_prompt)
         except RetryError as e:
             err_msg = f"Agent {self.name} failed to generate a response. Error: {e.last_attempt.exception()}. Sending signal to end the conversation."
             logging.warning(err_msg)
@@ -225,5 +232,9 @@ class Writer(Player):
             os.makedirs('storys')
         with open(f"storys/story_{self.timestamp}.txt", "a+") as file:
             file.write(response)
+            file.write("\n")
+        with open(f"storys/logs/log_{self.timestamp}.txt", "a+") as file:
+            for obs in observation:
+                file.write(obs.__str__() + '\n')
 
         return response
