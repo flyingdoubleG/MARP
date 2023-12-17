@@ -164,6 +164,8 @@ class Story(Environment):
             self.scene_message_pool.append_message(message)
         elif self._current_stage == "end of scene": 
             assert player_name == "Writer", "Writer writes the story"
+            message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+            self.global_message_pool.append_message(message)
             self._current_scene += 1
             self._next_stage = "scene_init"
         terminal = terminal or self.is_terminal()
@@ -174,10 +176,10 @@ class Story(Environment):
     def check_action(self, action: str, player_name: str) -> bool:
         if "As an AI language model" in action:  # GPT not act as the agent
             return False
-        if player_name == "Controller":
-            picked_player = self._parse_picked_player(action)
-            if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
-                return False
+        # if player_name == "Controller":
+        #     picked_player = self._parse_picked_player(action)
+        #     if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
+        #         return False
         return True
 
     def to_config(self) -> EnvironmentConfig:

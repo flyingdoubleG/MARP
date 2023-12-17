@@ -198,6 +198,7 @@ class Writer(Player):
     def __init__(self, name: str, role_desc: str, backend: Union[BackendConfig, IntelligenceBackend],
                  global_prompt: str = None, **kwargs):
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.scene_num = 1
         super().__init__(name, role_desc, backend, global_prompt, **kwargs)
 
     def act(self, observation: List[Message]) -> str:
@@ -224,6 +225,8 @@ class Writer(Player):
         if not os.path.exists('storys'):
             os.makedirs('storys')
         with open(f"storys/story_{self.timestamp}.txt", "a+") as file:
+            file.write(f'\nScene {self.scene_num}\n')
+            self.scene_num += 1
             file.write(response)
 
         return response
