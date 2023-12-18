@@ -1,12 +1,12 @@
 import random
 from typing import List, Union, Tuple
 
-from chatarena.backends import OpenAIChat
-from chatarena.config import EnvironmentConfig
-from chatarena.environments import TimeStep
-from chatarena.environments.base import Environment
-from chatarena.message import MessagePool, Message
-from chatarena.agent import SIGNAL_END_OF_CONVERSATION, Player
+from marp.backends import OpenAIChat
+from marp.config import EnvironmentConfig
+from marp.environments import TimeStep
+from marp.environments.base import Environment
+from marp.message import MessagePool, Message
+from marp.agent import SIGNAL_END_OF_CONVERSATION, Player
 
 PLAYER_TERMINAL = 'END'
 

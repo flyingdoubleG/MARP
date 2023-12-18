@@ -1,9 +1,9 @@
 import json
 
-from chatarena.agent import Player, Writer
-from chatarena.backends import OpenAIChat
-from chatarena.environments import Story
-from chatarena.arena import Arena
+from marp.agent import Player, Writer
+from marp.backends import OpenAIChat
+from marp.environments import Story
+from marp.arena import Arena
 
 
 DEFAULT_MAX_TOKENS = 4096
