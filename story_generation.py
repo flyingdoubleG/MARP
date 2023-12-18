@@ -9,9 +9,9 @@ from chatarena.arena import Arena
 DEFAULT_MAX_TOKENS = 4096
 
 
-environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
+# environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 
-# environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a desperate and dangerous situation as the Hosso Union approaches its capital, Zaragoza."
+environment_description = "You will collaborate to create a story. The general setting: The state of Ibrusia is coming to a desperate and dangerous situation as the Hosso Union approaches its capital, Zaragoza."
 
 # environment_description = "You will collaborate to create a story. The general setting: The state of Gurata is coming to a huge economic recession. People are in panic and streets are in turmoil."
 
