@@ -27,7 +27,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-To use gpt-4-1106-preview as LLM backend, set your OpenAI API key:
+To use gpt-4-1106-preview as LLM backend, make sure you have some funds (at least 3 dollars) in your OpenAI account and set your OpenAI API key:
 
 - Windows:
 ```bash
@@ -40,11 +40,14 @@ export OPENAI_API_KEY=sk-xxxx
 ```
 
 ### Run code
+Optional: You can change the value (string) of the `environment_description` variable in the `story_generation.py` file to try out different global prompts.
+
+Within the repo, run the following command in your terminal:
 
 ```bash
 python story_generation.py
 ```
-The generated conversations will be printed in terminal and the story will be saved as txt files in storys/ directory.
+The generated agent actions will be printed in terminal. A storys/ directory will be created and the generated story (named with a time stamp) will be saved as a txt file in this directory.
 
 ### Code structure 
 ```
@@ -71,7 +74,8 @@ The generated conversations will be printed in terminal and the story will be sa
 │           story_environment.py  # environment for story generation
 │           __init__.py
 │
-├───storys   # save generated stories and logs
+├───storys   # save generated stories and logs. This sub-directory is ignored by .gitignnore.
+    │            It will be created automatically on your local repo after your first run.
 │   │   story_20231126_213925.txt
 │   │   ...
 │   └───logs
