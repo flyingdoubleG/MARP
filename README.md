@@ -43,6 +43,7 @@ export OPENAI_API_KEY=sk-xxxx
 ```bash
 python story_generation.py
 ```
+The generated conversations will be printed in terminal and the story will be saved as txt files in storys/ directory.
 
 ### Code structure 
 ```
