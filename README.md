@@ -81,7 +81,7 @@ The generated agent actions will be printed in terminal. A storys/ directory wil
 │   └───logs
 │           log_20231217_104735.txt
 │           ...
-└───story_samples   # generated story for evaluation
+└───story_samples   # generated stories for evaluation
         ibrusia_gpt.txt
         ibrusia_marp.txt
         ...
