@@ -40,12 +40,46 @@ export OPENAI_API_KEY=sk-xxxx
 
 ### Run code
 
-
 ```bash
 python story_generation.py
 ```
 
-The generated log and story will be stored in "storys/" directory.
+### Code structure 
+```
+│   .gitignore
+│   LICENSE
+│   README.md
+│   requirements.txt
+│   story_generation.py  # specify environment and agents for story generation
+├───marp
+│   │   agent.py    # define agent class
+│   │   arena.py    # define how agents run in environment
+│   │   config.py
+│   │   message.py   # define message system
+│   │   utils.py
+│   │   __init__.py
+│   ├───backends
+│   │       bard.py
+│   │       base.py
+│   │       openai.py  # query GPT-4 api
+│   │       __init__.py
+│   │
+│   └───environments
+│           base.py
+│           story_environment.py  # environment for story generation
+│           __init__.py
+│
+├───storys   # save generated stories and logs
+│   │   story_20231126_213925.txt
+│   │   ...
+│   └───logs
+│           log_20231217_104735.txt
+│           ...
+└───story_samples   # generated story for evaluation
+        ibrusia_gpt.txt
+        ibrusia_marp.txt
+        ...
+```
 
 ## Contact
 If you have any questions or suggestions, feel free to open an issue or submit a pull request. We will provide timely feedback.
