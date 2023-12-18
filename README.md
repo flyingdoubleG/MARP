@@ -4,16 +4,17 @@
     <p>Multi-Agent Story Generation</p>
 </h3>
 
-MARP is a Story Generation Framework based on multi-agent collaboration and role-playing. Agents include Global designer, Scene designer, Controller, Character, Environment Manager, Writer.
+MARP is a Story Generation Framework based on multi-agent collaboration and role playing. Agents include a Global Designer, a Scene Designer, a Controller, an Environment Manager, a Writer, and several Player agents (the characters).
 
 ## Getting Started
 
 ### Installation
+There is no particular requirements on the operating system. MARP is compatible with Windows, macOS, Linux operating systems.
 
-Requirements:
+Package Requirements:
 
 - Python >= 3.7
-- OpenAI API key (WE use gpt-4-1106-preview as default LLM backend)
+- OpenAI API key (We use gpt-4-1106-preview as default LLM backend)
 
 Create conda environment:
 ```bash
