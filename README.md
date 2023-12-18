@@ -13,12 +13,12 @@ There is no particular requirements on the operating system. MARP is compatible 
 
 Package Requirements:
 
-- Python >= 3.7
+- Python >= 3.7 (3.11 recommended)
 - OpenAI API key (We use gpt-4-1106-preview as default LLM backend)
 
 Create conda environment:
 ```bash
-conda create --name marp python=3.7
+conda create --name marp python=3.11
 conda activate marp
 ```
 
