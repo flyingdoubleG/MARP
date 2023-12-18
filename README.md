@@ -9,7 +9,7 @@ MARP is a Story Generation Framework based on multi-agent collaboration and role
 ## Getting Started
 
 ### Installation
-There is no particular requirements on the operating system. MARP is compatible with Windows, macOS, Linux operating systems.
+There is no particular requirements on the operating system. MARP is compatible with both Windows and macOS.
 
 Package Requirements:
 
