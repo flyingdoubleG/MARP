@@ -6,7 +6,6 @@ import logging
 
 from .agent import Player
 from .environments import Environment, TimeStep, load_environment
-from .backends import Human
 from .config import ArenaConfig
 import pdb
 
@@ -76,13 +75,6 @@ class Arena:
 
         return timestep
 
-    def next_is_human(self):
-        """
-        check if the next player is human
-        """
-        player_name = self.environment.get_next_player()
-        player = self.name_to_player[player_name]
-        return isinstance(player.backend, Human)
 
     def run(self, num_steps: int = 1):
         """
@@ -139,13 +131,6 @@ class Arena:
             global_prompt=self.global_prompt
         )
 
-    def launch_cli(self, max_steps: int = None, interactive: bool = True):
-        """
-        launch the command line interface
-        """
-        from chatarena.ui.cli import ArenaCLI
-        cli = ArenaCLI(self)
-        cli.launch(max_steps=max_steps, interactive=interactive)
 
     def save_config(self, path: str):
         """

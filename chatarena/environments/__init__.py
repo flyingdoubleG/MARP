@@ -1,18 +1,10 @@
 from .base import Environment, TimeStep
-from .conversation import Conversation, ModeratedConversation
-from .chameleon import Chameleon
-from .pettingzoo_chess import PettingzooChess
-from .pettingzoo_tictactoe import PettingzooTicTacToe
+
 from .story_environment import Story
 
 from ..config import EnvironmentConfig
 
 ALL_ENVIRONMENTS = [
-    Conversation,
-    ModeratedConversation,
-    Chameleon,
-    PettingzooChess,
-    PettingzooTicTacToe,
     Story,
 ]
 
