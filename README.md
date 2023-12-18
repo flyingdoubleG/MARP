@@ -74,7 +74,7 @@ The generated agent actions will be printed in terminal. A storys/ directory wil
 │           story_environment.py  # environment for story generation
 │           __init__.py
 │
-├───storys   # save generated stories and logs. This sub-directory is ignored by .gitignnore.
+├───storys   # save generated stories and logs. This sub-directory is ignored by git.
     │            It will be created automatically on your local repo after your first run.
 │   │   story_20231126_213925.txt
 │   │   ...
