@@ -1,12 +1,2 @@
 tenacity==8.2.2
 openai==0.28
-pettingzoo>=1.23.1
-chess>=1.9.4
-transformers>=4.27.4
-gradio==3.34.0
-aiohttp==3.9.0b0
-ffmpy==0.3.0
-rich==13.3.3
-prompt_toolkit==3.0.38
-pdf2image>=1.16.3
-pytesseract>=0.3.10
