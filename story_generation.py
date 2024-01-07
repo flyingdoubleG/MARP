@@ -46,7 +46,7 @@ The act you summarize: Seated at an oak table laden with books and parchment, Br
 players = [controller, global_designer, designer, writer, env_manager]
 
 
-env = Story(player_names=[p.name for p in players], max_scene_turns=200, max_scenes=10, player_backend=BACKEND)
+env = Story(player_names=[p.name for p in players], max_scene_turns=2 ** 31, max_scenes=4, player_backend=BACKEND)
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)

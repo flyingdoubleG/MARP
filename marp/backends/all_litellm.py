@@ -27,7 +27,7 @@ END_OF_MESSAGE = "<EOS>"  # End of message token specified by us
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
 BASE_PROMPT = f"The messages should always end with the token {END_OF_MESSAGE}."
 litellm.drop_params = True
-litellm.set_verbose = True
+# litellm.set_verbose = True
 
 class AutoChat(IntelligenceBackend):
     """
