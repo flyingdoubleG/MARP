@@ -14,7 +14,7 @@ PLAYER_TERMINAL = 'END'
 class Story(Environment):
     type_name = "Story"
 
-    def __init__(self, player_names: List[str], max_scene_turns, max_scenes, **kwargs):
+    def __init__(self, player_names: List[str], max_scene_turns, max_scenes, player_backend=OpenAIChat(), **kwargs):
         super().__init__(player_names, **kwargs)
         self.global_message_pool = MessagePool()
         self.scene_message_pool = MessagePool()
@@ -29,6 +29,7 @@ class Story(Environment):
         self._arena = None
         self._current_act = Message('', '', -1)
         self._role_list = []
+        self.player_backend = player_backend
 
     def set_arena(self, arena):
         self._arena = arena
@@ -102,7 +103,7 @@ class Story(Environment):
         designed_players = [desc.split(':')[0] for desc in player_desc]
         descs = [desc.split(':')[1:] for desc in player_desc]
         for name, desc in zip(designed_players, descs):
-            player = Player(name=name, role_desc=desc, backend=OpenAIChat())
+            player = Player(name=name, role_desc=desc, backend=self.player_backend)
             self._arena.add_player(player)
             self._role_list.append(name)
             self.player_names.append(name)
@@ -183,12 +184,24 @@ class Story(Environment):
         return timestep
 
     def check_action(self, action: str, player_name: str) -> bool:
-        if "As an AI language model" in action:  # GPT not act as the agent
+        if "As an AI language model" in action:  # GPT not acting as the agent
             return False
-        # if player_name == "Controller":
-        #     picked_player = self._parse_picked_player(action)
-        #     if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
-        #         return False
+        if player_name == "Controller":
+            try:
+                picked_player = self._parse_picked_player(action)
+            except IndexError:
+                return False
+            if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
+                return False
+        elif player_name == "Global designer":
+            try:
+                player_desc = action.split('* ')[1:]
+                designed_players = [desc.split(':')[0] for desc in player_desc]
+                descs = [desc.split(':')[1:] for desc in player_desc]
+                if len(designed_players) == 0:
+                    raise IndexError
+            except IndexError:
+                return False
         return True
 
     def to_config(self) -> EnvironmentConfig:
