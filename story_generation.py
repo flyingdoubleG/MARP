@@ -10,7 +10,7 @@ DEFAULT_MAX_TOKENS = 4096
 
 # BACKEND = OpenAIChat()
 # BACKEND = MistralChat(device='mps')
-BACKEND = AutoChat(model='gemini-pro', temperature=0.6)
+BACKEND = AutoChat(model='anyscale/mistralai/Mistral-7B-Instruct-v0.1')
 
 # environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 
@@ -19,7 +19,7 @@ environment_description = "You will collaborate to create a story. The general s
 # environment_description = "You will collaborate to create a story. The general setting: The state of Gurata is coming to a huge economic recession. People are in panic and streets are in turmoil."
 
 controller = Player(name="Controller", backend=BACKEND,
-                        role_desc="You are the scene coordinator of a story. Your job is to select the next actor that should go on stage. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: '### Next up: Amy' or '### Next up: Sheldon'. If you think the scene should end, then print '### Next up: END'.",
+                        role_desc="You are the scene coordinator of a story. Your job is to select the next one actor that should act. You will be given several rounds of previous conversation in the play. If you think a player should be on stage next, print the player's name. For example: '### Next up: Amy' or '### Next up: Sheldon'. If you think the scene should end, then print '### Next up: END'. You should try not to repeat choosing the same player.",
                         global_prompt=environment_description)
 global_designer = Player(name="Global designer", backend=BACKEND,
                   role_desc=f'''You are the designer of a story. Your job is to design a global setting for this story. The topic of your story is '{environment_description}'. Please compose a setting (sufficient but not verbose) about the background, and design the characters in this setting. For example, a valid output is:
@@ -45,8 +45,9 @@ The act you summarize: Seated at an oak table laden with books and parchment, Br
 
 players = [controller, global_designer, designer, writer, env_manager]
 
+player_prompt = "You'll be given what you and other people have done previously. Please speak and act according to it. Try not to repeat what you did before."
 
-env = Story(player_names=[p.name for p in players], max_scene_turns=2 ** 31, max_scenes=4, player_backend=BACKEND)
+env = Story(player_names=[p.name for p in players], max_scene_turns=300, max_scenes=30, player_backend=BACKEND, player_prompt=player_prompt, summarize_act=False)
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)

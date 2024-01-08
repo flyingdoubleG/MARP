@@ -14,7 +14,7 @@ PLAYER_TERMINAL = 'END'
 class Story(Environment):
     type_name = "Story"
 
-    def __init__(self, player_names: List[str], max_scene_turns, max_scenes, player_backend=OpenAIChat(), **kwargs):
+    def __init__(self, player_names: List[str],max_scene_turns, max_scenes, player_prompt=None, player_backend=OpenAIChat(), summarize_act=True, **kwargs):
         super().__init__(player_names, **kwargs)
         self.global_message_pool = MessagePool()
         self.scene_message_pool = MessagePool()
@@ -30,6 +30,8 @@ class Story(Environment):
         self._current_act = Message('', '', -1)
         self._role_list = []
         self.player_backend = player_backend
+        self._player_prompt = player_prompt if player_prompt else ''
+        self._summarize_act = summarize_act
 
     def set_arena(self, arena):
         self._arena = arena
@@ -101,9 +103,9 @@ class Story(Environment):
         # ...
         player_desc = text.split('* ')[1:]
         designed_players = [desc.split(':')[0] for desc in player_desc]
-        descs = [desc.split(':')[1:] for desc in player_desc]
+        descs = [str(desc.split(':')[1:]) for desc in player_desc]
         for name, desc in zip(designed_players, descs):
-            player = Player(name=name, role_desc=desc, backend=self.player_backend)
+            player = Player(name=name, role_desc=desc + self._player_prompt, backend=self.player_backend)
             self._arena.add_player(player)
             self._role_list.append(name)
             self.player_names.append(name)
@@ -120,6 +122,12 @@ class Story(Environment):
 
     def _parse_picked_player(self, text: str) -> str:
             name = text.split('Next up: ')[1]
+            if name[-1] == '.':
+                # remove period at the end
+                name = name[:-1]
+            if '<EOS' in name:
+                # remove EOS
+                name = name.split('<')[0]
             if name == PLAYER_TERMINAL:
                 return PLAYER_TERMINAL
             for player_name in self.player_names:
@@ -164,10 +172,13 @@ class Story(Environment):
                 self._next_player_idx = self.player_names.index(next_player)
                 self._next_stage = "act"
         elif self._current_stage == "act":
-            # message = Message(agent_name=player_name, content=action, turn=self._current_turn)
-            # self.scene_message_pool.append_message(message)
-            self._current_act = Message(agent_name=player_name, content=f'The act you summarize: [{player_name}]: {action}', turn=self._current_turn)
-            self._next_stage = "impact"
+            if self._summarize_act:
+                self._current_act = Message(agent_name=player_name, content=f'The act you summarize: [{player_name}]: {action}', turn=self._current_turn)
+                self._next_stage = "impact"
+            else:
+                message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+                self.scene_message_pool.append_message(message)
+                self._next_stage = "pick"
         elif self._current_stage == "impact":
             self._next_stage = "pick"
             action = self._parse_env_manager_output(action)
@@ -186,12 +197,14 @@ class Story(Environment):
     def check_action(self, action: str, player_name: str) -> bool:
         if "As an AI language model" in action:  # GPT not acting as the agent
             return False
+        if "failed to generate a response" in action:
+            return False
         if player_name == "Controller":
             try:
                 picked_player = self._parse_picked_player(action)
             except IndexError:
                 return False
-            if picked_player not in self.player_names and picked_player != PLAYER_TERMINAL:
+            if picked_player not in self._role_list and picked_player != PLAYER_TERMINAL:
                 return False
         elif player_name == "Global designer":
             try:
