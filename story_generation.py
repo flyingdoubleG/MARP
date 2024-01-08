@@ -10,7 +10,8 @@ DEFAULT_MAX_TOKENS = 4096
 
 # BACKEND = OpenAIChat()
 # BACKEND = MistralChat(device='mps')
-BACKEND = AutoChat(model='anyscale/mistralai/Mistral-7B-Instruct-v0.1')
+# BACKEND = AutoChat(model='anyscale/mistralai/Mistral-7B-Instruct-v0.1')
+BACKEND = AutoChat(model='gemini-pro', temperature=0.8)
 
 # environment_description = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 
@@ -47,7 +48,7 @@ players = [controller, global_designer, designer, writer, env_manager]
 
 player_prompt = "You'll be given what you and other people have done previously. Please speak and act according to it. Try not to repeat what you did before."
 
-env = Story(player_names=[p.name for p in players], max_scene_turns=300, max_scenes=30, player_backend=BACKEND, player_prompt=player_prompt, summarize_act=False)
+env = Story(player_names=[p.name for p in players], max_scene_turns=10, max_scenes=5, player_backend=BACKEND, player_prompt=player_prompt, summarize_act=False)
 # arena = Arena.from_config('story_generation.json')
 arena = Arena(players=players,
               environment=env, global_prompt=environment_description)
