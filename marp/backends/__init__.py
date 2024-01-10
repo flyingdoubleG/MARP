@@ -2,9 +2,13 @@ from ..config import BackendConfig
 
 from .base import IntelligenceBackend
 from .openai import OpenAIChat
+# from .hf_transformers import MistralChat
+from .all_litellm import AutoChat
 
 ALL_BACKENDS = [
     OpenAIChat,
+    AutoChat,
+    # MistralChat
 ]
 
 BACKEND_REGISTRY = {backend.type_name: backend for backend in ALL_BACKENDS}
