@@ -3,6 +3,7 @@ from pathlib import Path
 from tqdm import tqdm
 import numpy as np
 import copy
+import csv
 
 GENERATE_ESSAY_PROMPT_TEMPLATE = "Based on premise: \"{}\" generate story containing several scenes, use scene1:, scene2:, ... to represent."
 
@@ -50,22 +51,22 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
     return evaluations
 
 
-baseline_path = 'gemini-ibrusia.txt'
-# generate_baseline('gemini-pro', IBRUSIA_PREMISE, baseline_path)
-for evaluator_model in ['gpt-3.5-turbo-16k', 'gemini-pro', 'anyscale/mistralai/Mistral-7B-Instruct-v0.1']:
-    print(f'Evaluating with {evaluator_model}...')
-    evaluations = evaluate(
-        essay_path='storys/mid_ibrusia.txt',
-        evaluator_model=evaluator_model,
-        premise=IBRUSIA_PREMISE,
-        num_trials=5,
-        baseline_path=baseline_path,
-    )
-    output_path = Path(f'evaluations/{evaluator_model}.txt')
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    with open(output_path, 'w+') as f:
-        f.write(f'********{evaluator_model}********\n')
-        f.write('\n\n\n********************************\n\n\n'.join(evaluations))
+# baseline_path = 'gemini-ibrusia.txt'
+# # generate_baseline('gemini-pro', IBRUSIA_PREMISE, baseline_path)
+# for evaluator_model in ['gpt-3.5-turbo-16k', 'gemini-pro', 'anyscale/mistralai/Mistral-7B-Instruct-v0.1']:
+#     print(f'Evaluating with {evaluator_model}...')
+#     evaluations = evaluate(
+#         essay_path='storys/mid_ibrusia.txt',
+#         evaluator_model=evaluator_model,
+#         premise=IBRUSIA_PREMISE,
+#         num_trials=5,
+#         baseline_path=baseline_path,
+#     )
+#     output_path = Path(f'evaluations/{evaluator_model}.txt')
+#     output_path.parent.mkdir(parents=True, exist_ok=True)
+#     with open(output_path, 'w+') as f:
+#         f.write(f'********{evaluator_model}********\n')
+#         f.write('\n\n\n********************************\n\n\n'.join(evaluations))
 
 
 def parse_scores(response, num_categories=6):
@@ -103,7 +104,10 @@ def parse_scores(response, num_categories=6):
             elif line.startswith("Story2"):
                 current_story = 2
             else:
-                score = int(line.split(': ')[1])
+                try:
+                    score = int(line.split(': ')[1])
+                except:
+                    continue
                 if current_story == 1:
                     llmScore1.append(score)
                 else:
@@ -133,8 +137,6 @@ def evaluate_stories(model, premises, stories1, stories2):
     :return: list of LLM scores for stories1, list of LLM scores for stories2
     """
     assert len(premises) == len(stories1) == len(stories2)
-    for i in range(len(stories1)):
-        assert stories1[i] == stories2[i]
     
     llmScores1, llmScores2 = [], []
     
@@ -152,6 +154,9 @@ def evaluate_stories(model, premises, stories1, stories2):
         else:
             llmScores1.append(llmScore1)
             llmScores2.append(llmScore2)
+            
+    llmScores1 = np.array(llmScores1).sum(axis=1)
+    llmScores2 = np.array(llmScores2).sum(axis=1)
     return llmScores1, llmScores2
 
 
@@ -198,11 +203,17 @@ def loadCSV(filepath):
     Load a csv file. The first line of the CSV file are the column names.
     Then each subsequent line is a row of data.
     """
-    with open(filepath, 'r') as f:
-        lines = f.readlines()
-    lines = [line.strip().split(',') for line in lines]
-    column_names = lines[0]
-    data = lines[1:]
+    with open(filepath, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        row_num = 0
+        for row in reader:
+            if row_num == 0:
+                column_names = row
+                data = []
+            else:
+                data.append(row)
+            row_num += 1
+
     return column_names, data
 
 def loadHanna(filepath):
@@ -250,10 +261,9 @@ def loadHanna(filepath):
         prompt2AddCount[prompt][writer] += 1
         prompt2Stories[prompt][writer] = story
     
-    for prompt in prompt2Idx:
-        for value in prompt2AddCount[prompt].values():
-            for writer in writers:
-                assert value[writer] == 3
+    for value in prompt2AddCount.values():
+        for writer in writers:
+            assert value[writer] == 3
     
     assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == num_prompts
 
@@ -268,6 +278,7 @@ def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_tr
     trainIdx2Prompt = {}
     trainPrompt2Scores = {}
     trainPrompt2Stories = {}
+
     testPrompt2Idx = {}
     testIdx2Prompt = {}
     testPrompt2Scores = {}
@@ -304,9 +315,9 @@ def evaluateHanna(model, filepath, num_prompts_eval=3):
     testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
 
     acc = 0
-    for i in len(writers):
+    for i in range(len(writers)):
         writer1 = writers[i]
-        for j in range(i, len(writers)):
+        for j in range(i+1, len(writers)):
             writer2 = writers[j]
             premises = []
             scores1 = []
@@ -314,20 +325,23 @@ def evaluateHanna(model, filepath, num_prompts_eval=3):
             stories1 = []
             stories2 = []
             
-            for prompt in trainPrompt2Idx[:num_prompts_eval]:
+            for prompt in list(trainPrompt2Idx.keys())[:num_prompts_eval]:
                 premises.append(prompt)
                 stories1.append(trainPrompt2Stories[prompt][writer1])
                 stories2.append(trainPrompt2Stories[prompt][writer2])
                 scores1.append(trainPrompt2Scores[prompt][writer1])
                 scores2.append(trainPrompt2Scores[prompt][writer2])
                 
-            llmScores1, llmScores2 = evaluate_stories(model, premises, stories1, stories2, scores1, scores2)
+            llmScores1, llmScores2 = evaluate_stories(model, premises, stories1, stories2)
 
-            acc += compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2)
+            tmp_acc = compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2)
+            print(f"Train Accuracy for {writer1} vs {writer2}: {tmp_acc}")
+            acc += tmp_acc
     
     acc /= (len(writers) * (len(writers) - 1) / 2)
-    print(f"Train Accuracy for {writer1} vs {writer2}: {acc}")
+    print(f"\nOverall Train Accuracy: {acc}")
 
 
 if __name__ == '__main__':
-    evaluateHanna('gpt-3.5-turbo-16k', 'hanna.csv', num_prompts_eval=2)
+    evaluateHanna('gpt-3.5-turbo-16k', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2)
+
