@@ -9,7 +9,11 @@ GENERATE_ESSAY_PROMPT_TEMPLATE = "Based on premise: \"{}\" generate story contai
 
 # RATE_ESSAY_PROMPT_TEMPLATE="Based on 1. Interesting. Interesting to the reader. 2. Coherent. Plot-coherent. 3. Relevant. Faithful to the initial premise. 4. Humanlike. Judged to be human-written.4 dimensions evaluate following 2 stories, the score is from 0 to 100, higher score means better.\nThe initial premise of story is \"{}\"\nStory 1: {}\n Story 2: {}."
 
-HANNA_RATE_ESSAY_PROMPT_TEMPLATE="Based on the following six categories: 1. Relevance. 2. Coherence. 3. Empathy. 4. Surprise. 5. Engagement. 6. Complexity, evaluate the following two stories by assigning an integer score (from 1 to 5) to each category. Higher score means better.\nThe initial premise of story is: {}\nStory1: {}\n Story2: {}.\n\nIn your response, please use the following example format: \nStory1\nRelevance: 3\nCoherence: 4\nEmpathy: 5\nSurprise: 2\nEngagement: 4\nComplexity: 3\nStory2\nRelevance: 3\nCoherence: 4\nEmpathy: 5\nSurprise: 2\nEngagement: 4\nComplexity: 3\n"
+# HANNA_RATE_ESSAY_PROMPT_TEMPLATE="Based on the following six categories: 1. Relevance. 2. Coherence. 3. Empathy. 4. Surprise. 5. Engagement. 6. Complexity, evaluate the following two stories by assigning an integer score (from 1 to 5) to each category. Higher score means better.\nThe initial premise of story is: {}\nStory1: {}\n Story2: {}.\n\nIn your response, please use the following example format strictly and no need for any extra explanations: \nStory1\nRelevance: 3\nCoherence: 4\nEmpathy: 5\nSurprise: 2\nEngagement: 4\nComplexity: 3\nStory2\nRelevance: 3\nCoherence: 4\nEmpathy: 5\nSurprise: 2\nEngagement: 4\nComplexity: 3\n"
+
+# HANNA_RATE_ESSAY_PROMPT_TEMPLATE="Based on the following four categories: 1. Interesting, 2. Coherent, 3. Relevant, 4. Humanlike, evaluate the following two stories by assigning an integer score (from 1 to 5) to each category. Higher score means better.\nThe initial premise of story is: {}\n\nStory1: {}\n\n Story2: {}.\n\nIn your response, please use the following example format strictly and no need for any extra explanations: \nStory1\nInteresting: 3\nCoherent: 4\nRelevant: 5\nHumanlike: 2\nStory2\nInteresting: 1\nCoherent: 5\nRelevant: 5\nHumanlike: 3\n"
+
+HANNA_RATE_ESSAY_PROMPT_TEMPLATE="Evaluate the following two stories by assigning an integer score (from 1 to 30) to each. Higher score means better.\nThe initial premise of story is: {}\n\nStory1: {}\n\n Story2: {}.\n\nIn your response, please use the following example format strictly and no need for any extra explanations: \nStory1\nScore: 19\nStory2\nScore: 22\n"
 
 
 QUARREL_PREMISE = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
@@ -69,7 +73,7 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 #         f.write('\n\n\n********************************\n\n\n'.join(evaluations))
 
 
-def parse_scores(response, num_categories=6):
+def parse_scores(response, num_categories=1):
     """
     Parses the scores from the evaluator's response.
     The response should be in the following format (the categories are just examples):
@@ -114,7 +118,7 @@ def parse_scores(response, num_categories=6):
                     llmScore2.append(score)
 
         if len(llmScore1) != num_categories or len(llmScore2) != num_categories:
-            raise ValueError("Incorrect number of scoring categories for one or both stories")
+            raise ValueError(f"Incorrect number of scoring categories for one or both stories.\nThe current response is:\n{response}")
 
         return llmScore1, llmScore2
     
@@ -154,7 +158,7 @@ def evaluate_stories(model, premises, stories1, stories2):
         else:
             llmScores1.append(llmScore1)
             llmScores2.append(llmScore2)
-            
+
     llmScores1 = np.array(llmScores1).sum(axis=1)
     llmScores2 = np.array(llmScores2).sum(axis=1)
     return llmScores1, llmScores2
@@ -343,5 +347,5 @@ def evaluateHanna(model, filepath, num_prompts_eval=3):
 
 
 if __name__ == '__main__':
-    evaluateHanna('gpt-3.5-turbo-16k', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2)
-
+    evaluateHanna('gpt-4-1106-preview', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2)
+    # evaluateHanna('gpt-3.5-turbo-1106', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2)
