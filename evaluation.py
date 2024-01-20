@@ -74,6 +74,111 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 #         f.write('\n\n\n********************************\n\n\n'.join(evaluations))
 
 
+def loadCSV(filepath):
+    """
+    Load a csv file. The first line of the CSV file are the column names.
+    Then each subsequent line is a row of data.
+    """
+    with open(filepath, newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        row_num = 0
+        for row in reader:
+            if row_num == 0:
+                column_names = row
+                data = []
+            else:
+                data.append(row)
+            row_num += 1
+
+    return column_names, data
+
+def loadHanna(filepath):
+    """
+    Load the Hanna dataset. The first line of the CSV file are the column names.
+    Then each subsequent line is a row of data.
+    """
+    num_prompts = 96
+    column_names, data = loadCSV(filepath)
+    writers = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
+
+    idx2Prompt = {}
+    prompt2Idx = {}
+    prompt2Scores = {}
+    # Helper dict to ensure each writer version of a story is evaluated three times.
+    prompt2AddCount = {}
+    prompt2Stories = {}
+    idx = 0
+    for row in data:
+        prompt = row[1].strip()
+        if prompt not in prompt2Idx:
+            prompt2Idx[prompt] = idx
+            idx2Prompt[idx] = prompt
+            idx += 1
+            prompt2Scores[prompt] = {}
+            prompt2AddCount[prompt] = {}
+            prompt2Stories[prompt] = {}
+            for writer in writers:
+                prompt2Scores[prompt][writer] = 0
+                prompt2AddCount[prompt][writer] = 0
+
+        writer = row[4].strip()
+        story = row[3].strip()
+
+        relevance = int(row[5])
+        coherence = int(row[6])
+        empathy = int(row[7])
+        surprise = int(row[8])
+        engagement = int(row[9])
+        complexity = int(row[10])
+        score = relevance + coherence + empathy + surprise + engagement + complexity
+
+
+        prompt2Scores[prompt][writer] += score
+        prompt2AddCount[prompt][writer] += 1
+        prompt2Stories[prompt][writer] = story
+    
+    for value in prompt2AddCount.values():
+        for writer in writers:
+            assert value[writer] == 3
+    
+    assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == num_prompts
+
+    return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
+
+def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
+    """
+    Splits the data into train and test sets.
+    """
+    trainPrompt2Idx = {}
+    trainIdx2Prompt = {}
+    trainPrompt2Scores = {}
+    trainPrompt2Stories = {}
+
+    testPrompt2Idx = {}
+    testIdx2Prompt = {}
+    testPrompt2Scores = {}
+    testPrompt2Stories = {}
+
+    for prompt in prompt2Idx:
+        idx = prompt2Idx[prompt]
+        if idx < num_train:
+            trainPrompt2Idx[prompt] = idx
+            trainIdx2Prompt[idx] = prompt
+            trainPrompt2Scores[prompt] = prompt2Scores[prompt]
+            trainPrompt2Stories[prompt] = prompt2Stories[prompt]
+        else:
+            testPrompt2Idx[prompt] = idx
+            testIdx2Prompt[idx] = prompt
+            testPrompt2Scores[prompt] = prompt2Scores[prompt]
+            testPrompt2Stories[prompt] = prompt2Stories[prompt]
+
+    assert len(trainPrompt2Idx) == len(trainIdx2Prompt) == len(trainPrompt2Scores) == len(trainPrompt2Stories) == num_train
+    assert len(testPrompt2Idx) == len(testIdx2Prompt) == len(testPrompt2Scores) == len(testPrompt2Stories) == len(prompt2Idx) - num_train
+
+    return [trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories], [testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories]
+
+
 def extract_first_number(text):
     match = re.search(r'\d+', text)
     if match:
@@ -238,112 +343,12 @@ def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
     return acc / len(scores1)
 
 
-def loadCSV(filepath):
+def evaluateHanna(model, filepath, num_prompts_eval=3, num_categories=1, bidir_eval=False, 
+                  eval_rounds=1):
     """
-    Load a csv file. The first line of the CSV file are the column names.
-    Then each subsequent line is a row of data.
+    bidir_eval: whether to evaluate both orders (directions) of presenting the two stories
+    eval_rounds: number of rounds of evaluation for the same two stories
     """
-    with open(filepath, newline='') as csvfile:
-        reader = csv.reader(csvfile)
-        row_num = 0
-        for row in reader:
-            if row_num == 0:
-                column_names = row
-                data = []
-            else:
-                data.append(row)
-            row_num += 1
-
-    return column_names, data
-
-def loadHanna(filepath):
-    """
-    Load the Hanna dataset. The first line of the CSV file are the column names.
-    Then each subsequent line is a row of data.
-    """
-    num_prompts = 96
-    column_names, data = loadCSV(filepath)
-    writers = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
-
-    idx2Prompt = {}
-    prompt2Idx = {}
-    prompt2Scores = {}
-    # Helper dict to ensure each writer version of a story is evaluated three times.
-    prompt2AddCount = {}
-    prompt2Stories = {}
-    idx = 0
-    for row in data:
-        prompt = row[1].strip()
-        if prompt not in prompt2Idx:
-            prompt2Idx[prompt] = idx
-            idx2Prompt[idx] = prompt
-            idx += 1
-            prompt2Scores[prompt] = {}
-            prompt2AddCount[prompt] = {}
-            prompt2Stories[prompt] = {}
-            for writer in writers:
-                prompt2Scores[prompt][writer] = 0
-                prompt2AddCount[prompt][writer] = 0
-
-        writer = row[4].strip()
-        story = row[3].strip()
-
-        relevance = int(row[5])
-        coherence = int(row[6])
-        empathy = int(row[7])
-        surprise = int(row[8])
-        engagement = int(row[9])
-        complexity = int(row[10])
-        score = relevance + coherence + empathy + surprise + engagement + complexity
-
-
-        prompt2Scores[prompt][writer] += score
-        prompt2AddCount[prompt][writer] += 1
-        prompt2Stories[prompt][writer] = story
-    
-    for value in prompt2AddCount.values():
-        for writer in writers:
-            assert value[writer] == 3
-    
-    assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == num_prompts
-
-    return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
-
-
-def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
-    """
-    Splits the data into train and test sets.
-    """
-    trainPrompt2Idx = {}
-    trainIdx2Prompt = {}
-    trainPrompt2Scores = {}
-    trainPrompt2Stories = {}
-
-    testPrompt2Idx = {}
-    testIdx2Prompt = {}
-    testPrompt2Scores = {}
-    testPrompt2Stories = {}
-
-    for prompt in prompt2Idx:
-        idx = prompt2Idx[prompt]
-        if idx < num_train:
-            trainPrompt2Idx[prompt] = idx
-            trainIdx2Prompt[idx] = prompt
-            trainPrompt2Scores[prompt] = prompt2Scores[prompt]
-            trainPrompt2Stories[prompt] = prompt2Stories[prompt]
-        else:
-            testPrompt2Idx[prompt] = idx
-            testIdx2Prompt[idx] = prompt
-            testPrompt2Scores[prompt] = prompt2Scores[prompt]
-            testPrompt2Stories[prompt] = prompt2Stories[prompt]
-
-    assert len(trainPrompt2Idx) == len(trainIdx2Prompt) == len(trainPrompt2Scores) == len(trainPrompt2Stories) == num_train
-    assert len(testPrompt2Idx) == len(testIdx2Prompt) == len(testPrompt2Scores) == len(testPrompt2Stories) == len(prompt2Idx) - num_train
-
-    return [trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories], [testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories]
-
-
-def evaluateHanna(model, filepath, num_prompts_eval=3, num_categories=1):
     num_train = 48
     assert num_prompts_eval <= num_train
 
@@ -372,8 +377,19 @@ def evaluateHanna(model, filepath, num_prompts_eval=3, num_categories=1):
                 stories2.append(trainPrompt2Stories[prompt][writer2])
                 scores1.append(trainPrompt2Scores[prompt][writer1])
                 scores2.append(trainPrompt2Scores[prompt][writer2])
-                
-            llmScores1, llmScores2 = evaluate_stories(model, premises, stories1, stories2, num_categories=num_categories)
+            
+            llmScores1 = np.zeros(num_prompts_eval)
+            llmScores2 = np.zeros(num_prompts_eval)
+            for _ in range(eval_rounds):
+                tmp_llmScores1, tmp_llmScores2 = evaluate_stories(model, premises, stories1, stories2, num_categories=num_categories)
+                llmScores1 += tmp_llmScores1
+                llmScores2 += tmp_llmScores2
+
+                # Bidirectional evaluation
+                if bidir_eval:
+                    tmp_llmScores2, tmp_llmScores1 = evaluate_stories(model, premises, stories2, stories1, num_categories=num_categories)
+                    llmScores2 += tmp_llmScores2
+                    llmScores1 += tmp_llmScores1
 
             tmp_acc = compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2)
             acc += tmp_acc
@@ -387,6 +403,6 @@ def evaluateHanna(model, filepath, num_prompts_eval=3, num_categories=1):
 
 
 if __name__ == '__main__':
-    evaluateHanna('gpt-4-1106-preview', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6)
-    # evaluateHanna('gpt-3.5-turbo-1106', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6)
-    # evaluateHanna('gpt-3.5-turbo', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6)
+    evaluateHanna('gpt-4-1106-preview', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
+    # evaluateHanna('gpt-3.5-turbo-1106', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
+    # evaluateHanna('gpt-3.5-turbo', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
