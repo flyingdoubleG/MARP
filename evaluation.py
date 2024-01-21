@@ -6,6 +6,9 @@ import copy
 import csv
 import re
 
+litellm.vertex_project = "multi-agent-411823"
+litellm.vertex_location = "us-central1"
+
 GENERATE_ESSAY_PROMPT_TEMPLATE = "Based on premise: \"{}\" generate story containing several scenes, use scene1:, scene2:, ... to represent."
 
 RATE_ESSAY_PROMPT_TEMPLATE="Based on 1. Interesting. Interesting to the reader. 2. Coherent. Plot-coherent. 3. Relevant. Faithful to the initial premise. 4. Humanlike. Judged to be human-written.4 dimensions evaluate following 2 stories, the score is from 0 to 100, higher score means better.\nThe initial premise of story is \"{}\"\nStory 1: {}\n Story 2: {}."
@@ -229,16 +232,16 @@ def parse_scores(response, num_categories=1):
         #             llmScore1.append(score)
         #         else:
         #             llmScore2.append(score)
-
+    
         for line in lines:
-            if line.startswith("Story"):
+            if "Story" in line:
                 story_num = extract_first_number(line)
                 if story_num == 1:
-                    continue
+                    current_story = 1
                 elif story_num == 2:
                     current_story = 2
                 else:
-                    raise ValueError(f"Invalid story number in response: {response}")
+                    raise ValueError(f"Invalid story number in response:\n{response}")
             else:
                 score = extract_first_number(line)
                 if score is None:
@@ -255,8 +258,7 @@ def parse_scores(response, num_categories=1):
     
     except Exception as e:
         # Handling any potential errors
-        print(f"Error parsing scores: {e}")
-        return None, None
+        raise ValueError(f"Error parsing scores: {e}")
 
 
 def evaluate_stories(model, premises, stories1, stories2, num_categories):
@@ -281,8 +283,20 @@ def evaluate_stories(model, premises, stories1, stories2, num_categories):
         story2 = stories2[i]
 
         prompt = HANNA_RATE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
-        response = get_response(model, prompt)
-        llmScore1, llmScore2 = parse_scores(response, num_categories=num_categories)
+
+        repeat_query = True
+        max_tries = 5
+        while repeat_query and max_tries > 0:
+            response = get_response(model, prompt)
+            try:
+                llmScore1, llmScore2 = parse_scores(response, num_categories=num_categories)
+                repeat_query = False
+            except:
+                repeat_query = True
+                max_tries -= 1
+                if max_tries == 0:
+                    llmScore1, llmScore2 = None, None
+
         
         if llmScore1 is None or llmScore2 is None:
             raise Exception(f"Error evaluating stories for premise {i+1}:\n\n{premise}")
@@ -403,6 +417,16 @@ def evaluateHanna(model, filepath, num_prompts_eval=3, num_categories=1, bidir_e
 
 
 if __name__ == '__main__':
-    evaluateHanna('gpt-4-1106-preview', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
+    # evaluateHanna('gpt-4-1106-preview', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
     # evaluateHanna('gpt-3.5-turbo-1106', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
     # evaluateHanna('gpt-3.5-turbo', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
+
+    evaluateHanna('gemini-pro', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=False, eval_rounds=1)
+
+    # evaluateHanna('gemini-pro', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
+
+    # evaluateHanna('gemini-pro', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=3)
+
+    # evaluateHanna('anyscale/mistralai/Mistral-7B-Instruct-v0.1', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=False, eval_rounds=1)
+
+    # evaluateHanna('anyscale/mistralai/Mistral-7B-Instruct-v0.1', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
