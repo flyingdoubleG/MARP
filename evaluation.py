@@ -60,9 +60,9 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 if __name__ == '__main__':
     # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', 
-    #                            num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1)
+    #                            num_prompts_eval=30, num_categories=6, bidir_eval=False, eval_rounds=1)
 
-    evaluator = ModelEvaluator('gpt-4-1106-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=30, num_categories=6, bidir_eval=False, eval_rounds=1)
+    evaluator = ModelEvaluator('gpt-4-1106-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=48, num_categories=6, bidir_eval=False, eval_rounds=1)
 
     # evaluator = ModelEvaluator('gpt-3.5-turbo', 'hanna', 'hanna/hanna_stories_annotations.csv', 
     #                            num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1)

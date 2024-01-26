@@ -333,7 +333,7 @@ class ModelEvaluator():
                 model_scores[prompt][writer] = self.evaluteSingleStory(prompt, story)
                 model_overall_scores[writer] += model_scores[prompt][writer]
                 print(f"Model score for {writer} on prompt {trainPrompt2Idx[prompt]}: {model_scores[prompt][writer]}")
-                
+
                 # Hanlding the 60 quotas/min limit for gemini-pro
                 if self.model == "gemini-pro":
                     time.sleep(0.3)
@@ -362,7 +362,7 @@ class ModelEvaluator():
                         acc += 1
                         cumu_acc += 1
                     
-                    print(f"Train Accuracy for {writer1} vs {writer2}: {acc / self.num_prompts_eval}; cumulative accuracy: {cumu_acc / acc_count}")
+                print(f"Train Accuracy for {writer1} vs {writer2}: {acc / self.num_prompts_eval}; cumulative accuracy: {cumu_acc / acc_count}")
         
         assert acc_count == len(writers) * (len(writers) - 1) / 2 * self.num_prompts_eval
         print(f"\nOverall Train Accuracy: {cumu_acc / acc_count}\n\n")
