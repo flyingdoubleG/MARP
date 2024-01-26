@@ -220,7 +220,7 @@ class ModelEvaluator():
                     llmScore = None
 
         if llmScore is None:
-            raise Exception(f"Error evaluating stories for premise {i+1}:\n\n{premise}")
+            raise Exception(f"Error evaluating stories for premise:\n\n{premise}")
         else:
             llmScore = sum(llmScore)
             return llmScore
