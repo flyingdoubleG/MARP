@@ -165,3 +165,5 @@ etc/
 .conda
 
 storys/
+# hanna/
+out.txt
