@@ -14,6 +14,11 @@ class DatasetLoader:
             self.num_human_evaluators = 3
             self.num_categories = 6
             self.processData = self.processDataHanna
+        elif dataset_name == "re3":
+            self.num_prompts = 297
+            self.num_human_evaluators = 3
+            self.num_categories = 3
+            self.processData = self.processDataRe3
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -37,6 +42,61 @@ class DatasetLoader:
         return column_names, data
 
     def processDataHanna(self):
+        """
+        Load the dataset. The first line of the CSV file are the column names.
+        Then each subsequent line is a row of data.
+        """
+        column_names, data = DatasetLoader.loadCSV(self.filepath)
+        writers = self.writers
+
+        idx2Prompt = {}
+        prompt2Idx = {}
+        prompt2Scores = {}
+
+        # Helper dictionary to ensure each writer version of a story is evaluated {self.num_human_evaluators} times.
+        prompt2AddCount = {}
+        prompt2Stories = {}
+
+        idx = 0
+        for row in data:
+            prompt = row[1].strip()
+            if prompt not in prompt2Idx:
+                prompt2Idx[prompt] = idx
+                idx2Prompt[idx] = prompt
+                idx += 1
+                prompt2Scores[prompt] = {}
+                prompt2AddCount[prompt] = {}
+                prompt2Stories[prompt] = {}
+                for writer in writers:
+                    prompt2Scores[prompt][writer] = 0
+                    prompt2AddCount[prompt][writer] = 0
+
+            writer = row[4].strip()
+            story = row[3].strip()
+
+            relevance = int(row[5])
+            coherence = int(row[6])
+            empathy = int(row[7])
+            surprise = int(row[8])
+            engagement = int(row[9])
+            complexity = int(row[10])
+            score = relevance + coherence + empathy + surprise + engagement + complexity
+
+
+            prompt2Scores[prompt][writer] += score
+            prompt2AddCount[prompt][writer] += 1
+            prompt2Stories[prompt][writer] = story
+        
+        for value in prompt2AddCount.values():
+            for writer in writers:
+                assert value[writer] == self.num_human_evaluators
+        
+        assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
+
+        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+    
+    
+    def processDataRe3(self):
         """
         Load the dataset. The first line of the CSV file are the column names.
         Then each subsequent line is a row of data.

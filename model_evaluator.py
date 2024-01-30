@@ -7,7 +7,7 @@ from standard_prompts import *
 from dataset_loader import DatasetLoader
 
 
-litellm.vertex_project = "multi-agent-411823"
+litellm.vertex_project = "marp-412702"
 litellm.vertex_location = "us-central1"
 
 
@@ -38,7 +38,7 @@ def extract_first_number(text):
 # Helper function
 def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
         """
-        Computes the model evaluation accuracy given the original and LLM scores.
+        Computes the model evaluation accuracy given the human and LLM scores.
         """
         assert len(scores1) == len(scores2) == len(llmScores1) == len(llmScores2)
 
@@ -89,12 +89,10 @@ class ModelEvaluator():
         self.bidir_eval = bidir_eval
         self.eval_rounds = eval_rounds
 
-        if dataset_name == "hanna":
-            self.evaluate = self.evaluateHanna
-            self.evaluateModels = self.evaluateModelsHanna
-            self.num_all_prompts = 96
-        else:
-            raise ValueError(f"Invalid dataset name: {dataset_name}")
+        self.evaluate = self.evaluate(self.dataset_name) # evaluate 2 stories - q
+        self.evaluateModels = self.evaluateModels(self.dataset_name) # evaluate 1 story - q, rank models
+        self.num_all_prompts = 96
+
         
     def parse_scores(self, response, double_story=True, keyword="Story"):
         """
@@ -114,6 +112,8 @@ class ModelEvaluator():
         Surprise: 2
         Engagement: 4
         Complexity: 3
+        
+        double_story: evaluate 2 stories together
         """
         try:
             # Splitting the response by newlines
@@ -126,7 +126,7 @@ class ModelEvaluator():
             current_story = 1
         
             for line in lines:
-                if (keyword is not None) and (keyword in line):
+                if (keyword is not None) and (keyword in line): # check story 1/2
                     story_num = extract_first_number(line)
                     if story_num == 1:
                         current_story = 1
@@ -134,7 +134,7 @@ class ModelEvaluator():
                         current_story = 2
                     else:
                         raise ValueError(f"Invalid story number in response:\n{response}")
-                else:
+                else: # extract score
                     score = extract_first_number(line)
                     if score is None:
                         continue
@@ -220,7 +220,7 @@ class ModelEvaluator():
                     llmScore = None
 
         if llmScore is None:
-            raise Exception(f"Error evaluating stories for premise {i+1}:\n\n{premise}")
+            raise Exception(f"Error evaluating stories for premise:\n\n{premise}")
         else:
             llmScore = sum(llmScore)
             return llmScore
@@ -239,14 +239,30 @@ class ModelEvaluator():
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
         return writers, train_set, test_set
+    
+    def evaluatePrefixRe3(self):
+        NUM_TRAIN = self.num_all_prompts // 2
+        assert self.num_prompts_eval <= NUM_TRAIN
 
-    def evaluateHanna(self):
-        writers, train_set, test_set = self.evaluatePrefixHanna()
+        writers = ["story1", "story2"]
+
+        loader = DatasetLoader(self.dataset_name, self.filepath, writers)
+
+        prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.processData()
+
+        train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
+
+        return writers, train_set, test_set
+
+    def evaluate(self, datasaet_name):
+        if datasaet_name == "hanna":
+            writers, train_set, test_set = self.evaluatePrefixHanna()
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
 
         acc = 0
         acc_count = 0
+        # C(N,2) combinations of writers
         for i in range(len(writers)):
             writer1 = writers[i]
             for j in range(i+1, len(writers)):
@@ -256,7 +272,7 @@ class ModelEvaluator():
                 scores2 = []
                 stories1 = []
                 stories2 = []
-                
+                # load stories and scores of each pair of writers
                 for prompt in list(trainPrompt2Idx.keys())[:self.num_prompts_eval]:
                     premises.append(prompt)
                     stories1.append(trainPrompt2Stories[prompt][writer1])
@@ -298,13 +314,14 @@ class ModelEvaluator():
         # sorted_scores is now a list of tuples sorted by the score
         return sorted_scores
 
-    def evaluateModelsHanna(self):
+    def evaluateModels(self, dataset_name):
         """
         Compare the overall story generation performance of different models (including possibly human) on a given number of prompts. The total human-evaluted scores for the stories generated by each model are averaged. The models are then ranked from the best to the worst based on the average scores.
         
         return: a list of (model, accuracy) tuples, sorted by accuracy from highest to lowest.
         """
-        writers, train_set, test_set = self.evaluatePrefixHanna()
+        if dataset_name == "hanna":
+            writers, train_set, test_set = self.evaluatePrefixHanna()
 
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
