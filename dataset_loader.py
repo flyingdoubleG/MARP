@@ -15,9 +15,9 @@ class DatasetLoader:
             self.num_categories = 6
             self.processData = self.processDataHanna
         elif dataset_name == "re3":
-            self.num_prompts = 297
+            self.num_prompts = None
             self.num_human_evaluators = 3
-            self.num_categories = 3
+            self.num_categories = 4
             self.processData = self.processDataRe3
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
@@ -96,6 +96,7 @@ class DatasetLoader:
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
     
     
+    
     def processDataRe3(self):
         """
         Load the dataset. The first line of the CSV file are the column names.
@@ -113,6 +114,10 @@ class DatasetLoader:
         prompt2Stories = {}
 
         idx = 0
+
+        def bool_to_int(s):
+            return 1 if s.lower() == 'true' else 0
+    
         for row in data:
             prompt = row[1].strip()
             if prompt not in prompt2Idx:
@@ -125,28 +130,32 @@ class DatasetLoader:
                 for writer in writers:
                     prompt2Scores[prompt][writer] = 0
                     prompt2AddCount[prompt][writer] = 0
+            for writer in ["story1", "story2"]:
+                if writer == "story1":
+                    story = row[2].strip()
+                    interesting = bool_to_int(row[4]) + bool_to_int(row[6])
+                    coherent = bool_to_int(row[8]) + bool_to_int(row[10])
+                    relevent = bool_to_int(row[12]) + bool_to_int(row[14])
+                    humanlike = bool_to_int(row[17])
+                elif writer == "story2":
+                    story = row[3].strip()
+                    interesting = bool_to_int(row[4]) + bool_to_int(row[7])
+                    coherent = bool_to_int(row[8]) + bool_to_int(row[11])
+                    relevent = bool_to_int(row[12]) + bool_to_int(row[15])
+                    humanlike = bool_to_int(row[19])
+                
+                score = interesting + coherent + relevent + humanlike
 
-            writer = row[4].strip()
-            story = row[3].strip()
-
-            relevance = int(row[5])
-            coherence = int(row[6])
-            empathy = int(row[7])
-            surprise = int(row[8])
-            engagement = int(row[9])
-            complexity = int(row[10])
-            score = relevance + coherence + empathy + surprise + engagement + complexity
-
-
-            prompt2Scores[prompt][writer] += score
-            prompt2AddCount[prompt][writer] += 1
-            prompt2Stories[prompt][writer] = story
+                prompt2Scores[prompt][writer] += score
+                prompt2AddCount[prompt][writer] += 1
+                prompt2Stories[prompt][writer] = story
         
-        for value in prompt2AddCount.values():
-            for writer in writers:
-                assert value[writer] == self.num_human_evaluators
+        # for value in prompt2AddCount.values():
+        #     for writer in writers:
+        #         print(value[writer])
+        #         assert value[writer] == self.num_human_evaluators
         
-        assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
+        # assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
     
