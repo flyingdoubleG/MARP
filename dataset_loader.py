@@ -1,5 +1,5 @@
 import csv
-
+import numpy as np
 
 class DatasetLoader:
     """
@@ -17,7 +17,7 @@ class DatasetLoader:
         elif dataset_name == "re3":
             self.num_prompts = None
             self.num_human_evaluators = 3
-            self.num_categories = 4
+            self.num_categories = 3
             self.processData = self.processDataRe3
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
@@ -128,7 +128,7 @@ class DatasetLoader:
                 prompt2AddCount[prompt] = {}
                 prompt2Stories[prompt] = {}
                 for writer in writers:
-                    prompt2Scores[prompt][writer] = 0
+                    prompt2Scores[prompt][writer] = np.array([0.0, 0.0, 0.0])
                     prompt2AddCount[prompt][writer] = 0
             for writer in ["story1", "story2"]:
                 if writer == "story1":
@@ -136,15 +136,15 @@ class DatasetLoader:
                     interesting = bool_to_float(row[4]) + bool_to_float(row[6])
                     coherent = bool_to_float(row[8]) + bool_to_float(row[10])
                     relevent = bool_to_float(row[12]) + bool_to_float(row[14])
-                    humanlike = bool_to_float(row[17])
+                    # humanlike = bool_to_float(row[17])
                 elif writer == "story2":
                     story = row[3].strip()
                     interesting = bool_to_float(row[4]) + bool_to_float(row[7])
                     coherent = bool_to_float(row[8]) + bool_to_float(row[11])
                     relevent = bool_to_float(row[12]) + bool_to_float(row[15])
-                    humanlike = bool_to_float(row[19])
+                    # humanlike = bool_to_float(row[19])
                 
-                score = interesting + coherent + relevent + humanlike
+                score = np.array([interesting, coherent, relevent])
 
                 prompt2Scores[prompt][writer] += score
                 prompt2AddCount[prompt][writer] += 1

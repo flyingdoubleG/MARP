@@ -53,18 +53,19 @@ def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
 
         assert len(scores1[0]) == len(scores2[0]) == len(llmScores1[0]) == len(llmScores2[0])
 
-        scores1 = scores1.sum(axis=1)
-        scores2 = scores2.sum(axis=1)
-        llmScores1 = llmScores1.sum(axis=1)
-        llmScores2 = llmScores2.sum(axis=1)
+        # scores1 = scores1.sum(axis=1)
+        # scores2 = scores2.sum(axis=1)
+        # llmScores1 = llmScores1.sum(axis=1)
+        # llmScores2 = llmScores2.sum(axis=1)
 
-        acc = 0
+        acc = np.zeros(scores1.shape[1])
         
-        for i in range(len(scores1)):
-            if (scores1[i] - scores2[i]) * (llmScores1[i] - llmScores2[i]) > 0:
-                acc += 1
-            elif (scores1[i] - scores2[i]) == (llmScores1[i] - llmScores2[i]) == 0:
-                acc += 1
+        for i in range(scores1.shape[0]):
+            for j in range(scores1.shape[1]):
+                if (scores1[i][j] - scores2[i][j]) * (llmScores1[i][j] - llmScores2[i][j]) > 0:
+                    acc[j] += 1
+                elif (scores1[i][j] - scores2[i][j]) == (llmScores1[i][j] - llmScores2[i][j]) == 0:
+                    acc[j] += 1
         return acc / len(scores1)
 
 
@@ -185,17 +186,17 @@ class ModelEvaluator():
                     elif choice == 'D': # Neither is good
                         llmScore1.append(0)
                         llmScore2.append(0)
-                elif idx == 3: # Story 1 was written by a human
-                    if choice == 'A': # Yes
-                        llmScore1.append(1)
-                    elif choice == 'B': # No
-                        llmScore1.append(0)
-                elif idx == 4: # Story 2 was written by a human
-                    if choice == 'A': # Yes
-                        llmScore2.append(1)
-                    elif choice == 'B': # No
-                        llmScore2.append(0)
-            if len(llmScore1) != 4 or len(llmScore2) != 4:
+                # elif idx == 3: # Story 1 was written by a human
+                #     if choice == 'A': # Yes
+                #         llmScore1.append(1)
+                #     elif choice == 'B': # No
+                #         llmScore1.append(0)
+                # elif idx == 4: # Story 2 was written by a human
+                #     if choice == 'A': # Yes
+                #         llmScore2.append(1)
+                #     elif choice == 'B': # No
+                #         llmScore2.append(0)
+            if len(llmScore1) != 3 or len(llmScore2) != 3:
                 raise ValueError("Failure when extracting choices")
 
             return llmScore1, llmScore2
@@ -227,7 +228,7 @@ class ModelEvaluator():
             if self.dataset_name == "hanna":
                 prompt = HANNA_RATE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
             elif self.dataset_name == "re3":
-                prompt = RE3_SURVEY_STORY_PROMPT_TEMPLATE.format(premise, story1, story2)
+                prompt = RE3_SURVEY_NOHUMANLIKE_STORY_PROMPT_TEMPLATE.format(premise, story1, story2)
             repeat_query = True
             max_tries = 5
             while repeat_query and max_tries > 0:
@@ -254,8 +255,10 @@ class ModelEvaluator():
                 print(f"[{i}] true score: story1: {scores1[i]} story2: {scores2[i]}")
                 print(f"[{i}] llm score: story1: {llmScore1} story2: {llmScore2}")
 
-        llmScores1 = np.array(llmScores1).sum(axis=1)
-        llmScores2 = np.array(llmScores2).sum(axis=1)
+        # llmScores1 = np.array(llmScores1).sum(axis=1)
+        # llmScores2 = np.array(llmScores2).sum(axis=1)
+        llmScores1 = np.array(llmScores1, dtype=float)
+        llmScores2 = np.array(llmScores2, dtype=float)
         return llmScores1, llmScores2
     
     def evaluteSingleStory(self, premise, story):
@@ -302,7 +305,7 @@ class ModelEvaluator():
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
 
-        acc = 0
+        acc = np.zeros(self.num_categories)
         acc_count = 0
         # C(N,2) combinations of writers
         for i in range(len(writers)):
@@ -322,8 +325,8 @@ class ModelEvaluator():
                     scores1.append(trainPrompt2Scores[prompt][writer1])
                     scores2.append(trainPrompt2Scores[prompt][writer2])
                 
-                llmScores1 = np.zeros(self.num_prompts_eval)
-                llmScores2 = np.zeros(self.num_prompts_eval)
+                llmScores1 = np.zeros((self.num_prompts_eval, self.num_categories))
+                llmScores2 = np.zeros((self.num_prompts_eval, self.num_categories))
                 for _ in range(self.eval_rounds):
                     tmp_llmScores1, tmp_llmScores2 = self.evaluate_stories(premises, stories1, stories2, scores1, scores2)
                     llmScores1 += tmp_llmScores1

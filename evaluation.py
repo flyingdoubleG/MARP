@@ -61,7 +61,7 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 if __name__ == '__main__':
     # evaluator = ModelEvaluator('gpt-3.5-turbo-1106', 're3', 're3/Re3_Rolling.csv', num_prompts_eval=99, num_categories=4, bidir_eval=False, eval_rounds=1)
     # evaluator = ModelEvaluator('gpt-3.5-turbo-1106', 're3', 're3/Re3_RollingFt.csv', num_prompts_eval=99, num_categories=4, bidir_eval=False, eval_rounds=1)
-    evaluator = ModelEvaluator('gpt-3.5-turbo-1106', 're3', 're3/Re3_PlanDraftRewrite.csv', num_prompts_eval=1, num_categories=4, bidir_eval=False, eval_rounds=1)
+    evaluator = ModelEvaluator('gpt-4-1106-preview', 're3', 're3/Re3_PlanDraftRewrite.csv', num_prompts_eval=99, num_categories=3, bidir_eval=False, eval_rounds=1)
     # evaluator = ModelEvaluator('gpt-3.5-turbo-1106', 're3', 're3/Re3_PlanDraftEdit.csv', num_prompts_eval=99, num_categories=4, bidir_eval=False, eval_rounds=1)
     # evaluator = ModelEvaluator('gpt-3.5-turbo-1106', 're3', 're3/Re3_DraftRewriteEdit.csv', num_prompts_eval=99, num_categories=4, bidir_eval=False, eval_rounds=1)
     
