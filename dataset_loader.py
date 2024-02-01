@@ -115,8 +115,8 @@ class DatasetLoader:
 
         idx = 0
 
-        def bool_to_int(s):
-            return 1 if s.lower() == 'true' else 0
+        def bool_to_float(s):
+            return 1.0 if s.lower() == 'true' else 0.0
     
         for row in data:
             prompt = row[1].strip()
@@ -133,16 +133,16 @@ class DatasetLoader:
             for writer in ["story1", "story2"]:
                 if writer == "story1":
                     story = row[2].strip()
-                    interesting = bool_to_int(row[4]) + bool_to_int(row[6])
-                    coherent = bool_to_int(row[8]) + bool_to_int(row[10])
-                    relevent = bool_to_int(row[12]) + bool_to_int(row[14])
-                    humanlike = bool_to_int(row[17])
+                    interesting = bool_to_float(row[4]) + bool_to_float(row[6])
+                    coherent = bool_to_float(row[8]) + bool_to_float(row[10])
+                    relevent = bool_to_float(row[12]) + bool_to_float(row[14])
+                    humanlike = bool_to_float(row[17])
                 elif writer == "story2":
                     story = row[3].strip()
-                    interesting = bool_to_int(row[4]) + bool_to_int(row[7])
-                    coherent = bool_to_int(row[8]) + bool_to_int(row[11])
-                    relevent = bool_to_int(row[12]) + bool_to_int(row[15])
-                    humanlike = bool_to_int(row[19])
+                    interesting = bool_to_float(row[4]) + bool_to_float(row[7])
+                    coherent = bool_to_float(row[8]) + bool_to_float(row[11])
+                    relevent = bool_to_float(row[12]) + bool_to_float(row[15])
+                    humanlike = bool_to_float(row[19])
                 
                 score = interesting + coherent + relevent + humanlike
 

@@ -1,0 +1,1400 @@
+re3/Re3_PlanDraftRewrite.csv
+response: 1) C
+2) B
+3) A
+4) A
+5) B
+[0] true score: story1: 10 story2: 5
+[0] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): B
+2): B
+3): B
+4): A
+5): B
+[1] true score: story1: 10 story2: 7
+[1] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1) B
+2) B
+3) B
+4) A
+5) A
+[2] true score: story1: 7 story2: 8
+[2] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[3] true score: story1: 7 story2: 11
+[3] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): B
+2): A
+3): A
+4): A
+5): B
+[4] true score: story1: 8 story2: 9
+[4] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[5] true score: story1: 9 story2: 9
+[5] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[6] true score: story1: 8 story2: 8
+[6] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1) B
+2) A
+3) A
+4) A
+5) A
+[7] true score: story1: 7 story2: 9
+[7] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): B
+4): A
+5): B
+[8] true score: story1: 9 story2: 8
+[8] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[9] true score: story1: 10 story2: 5
+[9] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[10] true score: story1: 8 story2: 7
+[10] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[11] true score: story1: 9 story2: 8
+[11] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1): C
+2): A
+3): B
+4): A
+5): B
+[12] true score: story1: 11 story2: 5
+[12] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1) A
+2) A
+3) B
+4) A
+5) B
+[13] true score: story1: 9 story2: 7
+[13] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) A
+[14] true score: story1: 9 story2: 9
+[14] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1) B
+2) A
+3) A
+4) A
+5) B
+[15] true score: story1: 10 story2: 6
+[15] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) B
+2) B
+3) A
+4) B
+5) A
+[16] true score: story1: 7 story2: 10
+[16] llm score: story1: [0, 0, 1, 0] story2: [1, 1, 0, 1]
+response: 1): B
+2): A
+3): B
+4): A
+5): B
+[17] true score: story1: 7 story2: 9
+[17] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[18] true score: story1: 4 story2: 12
+[18] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) C
+2) A
+3) B
+4) A
+5) A
+[19] true score: story1: 19 story2: 13
+[19] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[20] true score: story1: 8 story2: 9
+[20] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[21] true score: story1: 10 story2: 5
+[21] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): B
+2): A
+3): B
+4): A
+5): A
+[22] true score: story1: 12 story2: 7
+[22] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[23] true score: story1: 8 story2: 9
+[23] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[24] true score: story1: 10 story2: 9
+[24] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): B
+2): A
+3): A
+4): N/A
+5): N/A
+[25] true score: story1: 10 story2: 6
+[25] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) B
+3) A
+4) A
+5) A
+[26] true score: story1: 9 story2: 9
+[26] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[27] true score: story1: 7 story2: 7
+[27] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): B
+[28] true score: story1: 10 story2: 7
+[28] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1): A
+2): A
+3): B
+4): A
+5): A
+[29] true score: story1: 6 story2: 9
+[29] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 1]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[30] true score: story1: 11 story2: 8
+[30] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) B
+[31] true score: story1: 9 story2: 9
+[31] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): B
+2): A
+3): B
+4): A
+5): B
+[32] true score: story1: 9 story2: 8
+[32] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[33] true score: story1: 7 story2: 6
+[33] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[34] true score: story1: 5 story2: 10
+[34] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[35] true score: story1: 10 story2: 8
+[35] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): B
+2): A
+3): A
+4): A
+5): B
+[36] true score: story1: 8 story2: 11
+[36] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): B
+2): A
+3): A
+4): A
+5): A
+[37] true score: story1: 9 story2: 7
+[37] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[38] true score: story1: 9 story2: 6
+[38] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) B
+2) A
+3) A
+4) A
+5) B
+[39] true score: story1: 7 story2: 8
+[39] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[40] true score: story1: 7 story2: 9
+[40] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[41] true score: story1: 9 story2: 6
+[41] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[42] true score: story1: 9 story2: 10
+[42] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[43] true score: story1: 9 story2: 11
+[43] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[44] true score: story1: 11 story2: 10
+[44] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1): B
+2): A
+3): B
+4): A
+5): B
+[45] true score: story1: 5 story2: 10
+[45] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1): B
+2): B
+3): A
+4): A
+5): A
+[46] true score: story1: 10 story2: 8
+[46] llm score: story1: [0, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[47] true score: story1: 5 story2: 11
+[47] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): B
+2): B
+3): B
+4): A
+5): B
+[48] true score: story1: 6 story2: 9
+[48] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1) C
+2) A
+3) A
+4) A
+5) A
+[49] true score: story1: 12 story2: 11
+[49] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[50] true score: story1: 7 story2: 7
+[50] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[51] true score: story1: 9 story2: 6
+[51] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): D
+2): A
+3): B
+4): B
+5): B
+[52] true score: story1: 8 story2: 8
+[52] llm score: story1: [0, 1, 0, 0] story2: [0, 0, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[53] true score: story1: 7 story2: 6
+[53] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[54] true score: story1: 9 story2: 7
+[54] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) C
+2) A
+3) A
+4) A
+5) A
+[55] true score: story1: 7 story2: 6
+[55] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[56] true score: story1: 8 story2: 7
+[56] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[57] true score: story1: 8 story2: 7
+[57] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): C
+2): B
+3): B
+4): A
+5): B
+[58] true score: story1: 8 story2: 9
+[58] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[59] true score: story1: 10 story2: 5
+[59] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[60] true score: story1: 9 story2: 6
+[60] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[61] true score: story1: 9 story2: 8
+[61] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): B
+2): A
+3): A
+4): A
+5): A
+[62] true score: story1: 11 story2: 10
+[62] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[63] true score: story1: 10 story2: 1
+[63] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1) C
+2) A
+3) A
+4) A
+5) B
+[64] true score: story1: 5 story2: 8
+[64] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[65] true score: story1: 7 story2: 8
+[65] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[66] true score: story1: 2 story2: 9
+[66] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[67] true score: story1: 6 story2: 7
+[67] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[68] true score: story1: 9 story2: 7
+[68] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) C
+2) A
+3) A
+4) A
+5) B
+[69] true score: story1: 9 story2: 5
+[69] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[70] true score: story1: 7 story2: 4
+[70] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) C
+2) A
+3) B
+4) A
+5) B
+[71] true score: story1: 4 story2: 11
+[71] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1) C
+2) A
+3) A
+4) A
+5) B
+[72] true score: story1: 7 story2: 4
+[72] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): B
+5): B
+[73] true score: story1: 10 story2: 7
+[73] llm score: story1: [1, 1, 1, 0] story2: [0, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[74] true score: story1: 9 story2: 6
+[74] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) C
+2) B
+3) B
+4) A
+5) B
+[75] true score: story1: 8 story2: 8
+[75] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[76] true score: story1: 4 story2: 6
+[76] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): B
+2): B
+3): B
+4): A
+5): A
+[77] true score: story1: 7 story2: 8
+[77] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): A
+2): A
+3): B
+4): A
+5): A
+[78] true score: story1: 9 story2: 7
+[78] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 1]
+response: 1): C
+2): C
+3): A
+4): A
+5): B
+[79] true score: story1: 7 story2: 7
+[79] llm score: story1: [1, 1, 1, 1] story2: [1, 1, 0, 0]
+response: 1) A
+2) A
+3) A
+4) B
+5) B
+[80] true score: story1: 6 story2: 9
+[80] llm score: story1: [1, 1, 1, 0] story2: [0, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[81] true score: story1: 10 story2: 7
+[81] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[82] true score: story1: 8 story2: 9
+[82] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): C
+2): A
+3): B
+4): A
+5): A
+[83] true score: story1: 9 story2: 7
+[83] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1): C
+2): B
+3): B
+4): A
+5): A
+[84] true score: story1: 10 story2: 5
+[84] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): C
+2): B
+3): A
+4): B
+5): A
+[85] true score: story1: 6 story2: 4
+[85] llm score: story1: [1, 0, 1, 0] story2: [1, 1, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[86] true score: story1: 10 story2: 5
+[86] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[87] true score: story1: 8 story2: 5
+[87] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[88] true score: story1: 9 story2: 7
+[88] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) C. Both are about equally good
+2) A. Story 1
+3) A. Story 1
+4) A. Yes
+5) A. Yes
+response: 1) B
+2) A
+3) A
+4) A
+5) A
+[89] true score: story1: 6 story2: 9
+[89] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) B
+[90] true score: story1: 9 story2: 9
+[90] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): C
+2): A
+3): B
+4): A
+5): A
+[91] true score: story1: 9 story2: 3
+[91] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1): A
+2): C
+3): B
+4): A
+5): A
+[92] true score: story1: 10 story2: 7
+[92] llm score: story1: [1, 1, 0, 1] story2: [0, 1, 1, 1]
+response: 1): B
+2): A
+3): B
+4): A
+5): A
+[93] true score: story1: 11 story2: 3
+[93] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) B
+[94] true score: story1: 9 story2: 6
+[94] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[95] true score: story1: 6 story2: 9
+[95] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[96] true score: story1: 5 story2: 9
+[96] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) B
+2) B
+3) B
+4) A
+5) B
+[97] true score: story1: 12 story2: 1
+[97] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[98] true score: story1: 10 story2: 4
+[98] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+Train Accuracy for story1 vs story2: 0.46464646464646464; cumulative accuracy: 0.46464646464646464
+
+Overall Train Accuracy: 0.46464646464646464
+
+re3/Re3_Rolling.csv
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[0] true score: story1: 9 story2: 6
+[0] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): C
+2): A
+3): B
+4): B
+5): B
+[1] true score: story1: 3 story2: 7
+[1] llm score: story1: [1, 1, 0, 0] story2: [1, 0, 1, 0]
+response: 1): A
+2): B
+3): B
+4): A
+5): A
+[2] true score: story1: 10 story2: 4
+[2] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 1]
+response: 1) A
+2) A
+3) B
+4) A
+5) B
+[3] true score: story1: 4 story2: 10
+[3] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 0]
+response: 1) C
+2) A
+3) A
+4) B
+5) B
+[4] true score: story1: 3 story2: 8
+[4] llm score: story1: [1, 1, 1, 0] story2: [1, 0, 0, 0]
+response: 1) C
+2) B
+3) B
+4) A
+5) B
+[5] true score: story1: 6 story2: 10
+[5] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[6] true score: story1: 8 story2: 7
+[6] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) B
+[7] true score: story1: 5 story2: 10
+[7] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): A
+2): B
+3): B
+4): B
+5): A
+[8] true score: story1: 8 story2: 6
+[8] llm score: story1: [1, 0, 0, 0] story2: [0, 1, 1, 1]
+response: 1) B
+2) A
+3) B
+4) A
+5) A
+[9] true score: story1: 5 story2: 4
+[9] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1) C
+2) A
+3) A
+4) A
+5) A
+[10] true score: story1: 4 story2: 8
+[10] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): B
+3): B
+4): A
+5): A
+[11] true score: story1: 7 story2: 10
+[11] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[12] true score: story1: 8 story2: 6
+[12] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): B
+2): A
+3): B
+4): B
+5): B
+[13] true score: story1: 8 story2: 0
+[13] llm score: story1: [0, 1, 0, 0] story2: [1, 0, 1, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[14] true score: story1: 5 story2: 8
+[14] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1): C
+2): B
+3): B
+4): A
+5): B
+[15] true score: story1: 5 story2: 10
+[15] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1) A
+2) B
+3) B
+4) A
+5) B
+[16] true score: story1: 8 story2: 9
+[16] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1) A
+2) A
+3) B
+4) B
+5) B
+[17] true score: story1: 3 story2: 9
+[17] llm score: story1: [1, 1, 0, 0] story2: [0, 0, 1, 0]
+response: 1): B
+2): B
+3): B
+4): A
+5): B
+[18] true score: story1: 5 story2: 4
+[18] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): C
+2): B
+3): B
+4): A
+5): A
+[19] true score: story1: 15 story2: 15
+[19] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): C
+2): B
+3): A
+4): B
+5): B
+[20] true score: story1: 9 story2: 5
+[20] llm score: story1: [1, 0, 1, 0] story2: [1, 1, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[21] true score: story1: 11 story2: 4
+[21] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1):A
+2):B
+3):A
+4):B
+5):B
+[22] true score: story1: 11 story2: 3
+[22] llm score: story1: [1, 0, 1, 0] story2: [0, 1, 0, 0]
+response: 1): C
+2): B
+3): B
+4): A
+5): A
+[23] true score: story1: 2 story2: 9
+[23] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[24] true score: story1: 3 story2: 9
+[24] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[25] true score: story1: 0 story2: 11
+[25] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) A
+2) A
+3) B
+4) B
+5) A
+[26] true score: story1: 6 story2: 7
+[26] llm score: story1: [1, 1, 0, 0] story2: [0, 0, 1, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[27] true score: story1: 9 story2: 6
+[27] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[28] true score: story1: 3 story2: 12
+[28] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[29] true score: story1: 11 story2: 8
+[29] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[30] true score: story1: 12 story2: 0
+[30] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[31] true score: story1: 9 story2: 1
+[31] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1):C
+2):B
+3):B
+4):A
+5):A
+[32] true score: story1: 7 story2: 10
+[32] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[33] true score: story1: 11 story2: 5
+[33] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) C
+2) B
+3) A
+4) A
+5) B
+[34] true score: story1: 8 story2: 7
+[34] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): B
+[35] true score: story1: 9 story2: 5
+[35] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[36] true score: story1: 11 story2: 3
+[36] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[37] true score: story1: 6 story2: 7
+[37] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[38] true score: story1: 10 story2: 3
+[38] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1): A
+2): B
+3): A
+4): A
+5): B
+[39] true score: story1: 6 story2: 6
+[39] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[40] true score: story1: 10 story2: 4
+[40] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) B
+3) B
+4) A
+5) B
+[41] true score: story1: 8 story2: 5
+[41] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): B
+2): A
+3): A
+4): A
+5): A
+[42] true score: story1: 3 story2: 10
+[42] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) A
+3) B
+4) A
+5) B
+[43] true score: story1: 11 story2: 5
+[43] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[44] true score: story1: 5 story2: 9
+[44] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1): C
+2): A
+3): B
+4): A
+5): A
+[45] true score: story1: 12 story2: 2
+[45] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1) C
+2) B
+3) B
+4) A
+5) B
+[46] true score: story1: 6 story2: 10
+[46] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): B
+2): A
+3): B
+4): A
+5): A
+[47] true score: story1: 7 story2: 7
+[47] llm score: story1: [0, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[48] true score: story1: 6 story2: 11
+[48] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[49] true score: story1: 9 story2: 5
+[49] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) C
+2) B
+3) A
+4) A
+5) A
+[50] true score: story1: 6 story2: 10
+[50] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[51] true score: story1: 8 story2: 7
+[51] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1) C
+2) A
+3) A
+4) A
+5) B
+[52] true score: story1: 9 story2: 5
+[52] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[53] true score: story1: 6 story2: 9
+[53] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[54] true score: story1: 5 story2: 9
+[54] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): C
+2): A
+3): B
+4): A
+5): B
+[55] true score: story1: 8 story2: 7
+[55] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[56] true score: story1: 3 story2: 10
+[56] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): A
+[57] true score: story1: 9 story2: 6
+[57] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) C
+2) B
+3) A
+4) A
+5) B
+[58] true score: story1: 5 story2: 8
+[58] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1) C
+2) B
+3) B
+4) A
+5) A
+[59] true score: story1: 3 story2: 10
+[59] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): B
+2): B
+3): B
+4): A
+5): A
+[60] true score: story1: 7 story2: 8
+[60] llm score: story1: [0, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): A
+2): B
+3): A
+4): B
+5): A
+[61] true score: story1: 6 story2: 8
+[61] llm score: story1: [1, 0, 1, 0] story2: [0, 1, 0, 1]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[62] true score: story1: 8 story2: 7
+[62] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1) C
+2) A
+3) A
+4) A
+5) B
+[63] true score: story1: 9 story2: 8
+[63] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[64] true score: story1: 10 story2: 5
+[64] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): A
+3): B
+4): A
+5): A
+[65] true score: story1: 7 story2: 7
+[65] llm score: story1: [1, 1, 0, 1] story2: [0, 0, 1, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): A
+[66] true score: story1: 8 story2: 7
+[66] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[67] true score: story1: 5 story2: 7
+[67] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): B
+2): B
+3): A
+4): A
+5): B
+[68] true score: story1: 9 story2: 7
+[68] llm score: story1: [0, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): A
+2): A
+3): A
+4): B
+5): B
+[69] true score: story1: 9 story2: 5
+[69] llm score: story1: [1, 1, 1, 0] story2: [0, 0, 0, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[70] true score: story1: 9 story2: 7
+[70] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1) C
+2) A
+3) B
+4) A
+5) B
+[71] true score: story1: 9 story2: 7
+[71] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 0]
+response: 1): C
+2): B
+3): B
+4): A
+5): B
+[72] true score: story1: 6 story2: 9
+[72] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 0]
+response: 1): A
+2): A
+3): A
+4): A
+5): B
+[73] true score: story1: 6 story2: 10
+[73] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[74] true score: story1: 7 story2: 7
+[74] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): B
+2): A
+3): A
+4): A
+5): B
+[75] true score: story1: 9 story2: 5
+[75] llm score: story1: [0, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[76] true score: story1: 8 story2: 9
+[76] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1) A
+2) B
+3) A
+4) A
+5) A
+[77] true score: story1: 8 story2: 6
+[77] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[78] true score: story1: 7 story2: 8
+[78] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[79] true score: story1: 9 story2: 7
+[79] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1) C
+2) A
+3) B
+4) A
+5) A
+[80] true score: story1: 9 story2: 5
+[80] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1): C
+2): B
+3): A
+4): A
+5): B
+[81] true score: story1: 9 story2: 6
+[81] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[82] true score: story1: 7 story2: 9
+[82] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[83] true score: story1: 7 story2: 7
+[83] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1) A
+2) A
+3) A
+4) A
+5) A
+[84] true score: story1: 9 story2: 6
+[84] llm score: story1: [1, 1, 1, 1] story2: [0, 0, 0, 1]
+response: 1) A
+2) B
+3) A
+4) A
+5) B
+[85] true score: story1: 10 story2: 5
+[85] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 0]
+response: 1) B
+2) A
+3) C
+4) B
+5) A
+[86] true score: story1: 10 story2: 4
+[86] llm score: story1: [0, 1, 1, 0] story2: [1, 0, 1, 1]
+response: 1): A
+2): B
+3): B
+4): A
+5): B
+[87] true score: story1: 7 story2: 9
+[87] llm score: story1: [1, 0, 0, 1] story2: [0, 1, 1, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[88] true score: story1: 7 story2: 8
+[88] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[89] true score: story1: 10 story2: 6
+[89] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): A
+[90] true score: story1: 7 story2: 7
+[90] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[91] true score: story1: 7 story2: 3
+[91] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): B
+3): A
+4): A
+5): A
+[92] true score: story1: 8 story2: 6
+[92] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 1]
+response: 1) C
+2) B
+3) B
+4) A
+5) A
+[93] true score: story1: 7 story2: 8
+[93] llm score: story1: [1, 0, 0, 1] story2: [1, 1, 1, 1]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[94] true score: story1: 3 story2: 2
+[94] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): C
+2): A
+3): A
+4): A
+5): B
+[95] true score: story1: 10 story2: 5
+[95] llm score: story1: [1, 1, 1, 1] story2: [1, 0, 0, 0]
+response: 1): A
+2): B
+3): A
+4): A
+5): A
+[96] true score: story1: 9 story2: 6
+[96] llm score: story1: [1, 0, 1, 1] story2: [0, 1, 0, 1]
+response: 1): C
+2): A
+3): B
+4): A
+5): A
+[97] true score: story1: 8 story2: 8
+[97] llm score: story1: [1, 1, 0, 1] story2: [1, 0, 1, 1]
+response: 1) C
+2) B
+3) A
+4) A
+5) B
+[98] true score: story1: 7 story2: 7
+[98] llm score: story1: [1, 0, 1, 1] story2: [1, 1, 0, 0]
+Train Accuracy for story1 vs story2: 0.46464646464646464; cumulative accuracy: 0.46464646464646464
+
+Overall Train Accuracy: 0.46464646464646464
