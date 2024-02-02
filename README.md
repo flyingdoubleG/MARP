@@ -47,7 +47,9 @@ Within the repo, run the following command in your terminal:
 ```bash
 python story_generation.py
 ```
-The generated agent actions will be printed in terminal. A storys/ directory will be created and the generated story (named with a time stamp) will be saved as a txt file in this directory.
+The generated agent actions will be printed in terminal. A `storys/` directory will be created and the generated story (named with a time stamp) will be saved as a txt file in this directory.
+
+To generate a story with your own premise, you can change the variable `environment_description` in `story_generation.py`.
 
 ### Code structure 
 ```
