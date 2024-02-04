@@ -2,14 +2,15 @@ import re
 import numpy as np
 import litellm
 import time
+import vertexai
+# from gemini import gemini_response, gemini_chat
 
 from standard_prompts import *
 from dataset_loader import DatasetLoader
 
-
 litellm.vertex_project = "multi-agent-411823"
 litellm.vertex_location = "us-central1"
-
+# litellm.set_verbose=True
 
 # Helper function
 def get_response(model, message):
@@ -71,7 +72,7 @@ def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
 
 class ModelEvaluator():
     def __init__(self, model, dataset_name, filepath, num_prompts_eval=3, 
-                 num_categories=1, bidir_eval=False, eval_rounds=1):
+                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only"):
         """
         num_prompts_eval: number of prompts to evaluate
         num_categories: number of scoring categories to evaluate
@@ -88,6 +89,8 @@ class ModelEvaluator():
         self.num_categories = num_categories
         self.bidir_eval = bidir_eval
         self.eval_rounds = eval_rounds
+        self.verbose = verbose
+        self.query_mode = query_mode
 
         if dataset_name == "hanna":
             self.evaluate = self.evaluateHanna
@@ -95,7 +98,34 @@ class ModelEvaluator():
             self.num_all_prompts = 96
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
+
+    def parse_scores_advanced(self, response):
+        """
+        Parses single story scores from analyze-rate format.
+        """
+        try:
+            # Splitting the response by newlines
+            lines = response.strip().split('\n')
+            
+            # Placeholder for scores
+            llm_score = []
         
+            for line in lines:
+                if bool(re.search(r'\*[^*]+\*', line)):
+                    score = extract_first_number(line)
+                    if score is None:
+                        continue
+                    else:
+                        llm_score.append(score)
+            
+            if len(llm_score) != self.num_categories:
+                raise ValueError(f"Incorrect number of scoring categories for the story.\nThe current response is:\n{response}")
+            return llm_score
+        
+        except Exception as e:
+            # Handling any potential errors
+            raise ValueError(f"Error parsing scores: {e}")
+
     def parse_scores(self, response, double_story=True, keyword="Story"):
         """
         Parses the scores from the evaluator's response.
@@ -203,18 +233,43 @@ class ModelEvaluator():
         llmScores2 = np.array(llmScores2).sum(axis=1)
         return llmScores1, llmScores2
     
-    def evaluteSingleStory(self, premise, story):
-        prompt = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+    def evaluate_single_story(self, premise, story):
+        if self.query_mode == "score only":
+            prompt = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+        elif self.query_mode == "analyze rate":
+            prompt = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+        else:
+            raise ValueError(f"Invalid query mode: {self.query_mode}")
 
         repeat_query = True
         max_tries = 5
         while repeat_query and max_tries > 0:
-            response = get_response(self.model, prompt)
+            repeat_query = False
+
             try:
-                llmScore = self.parse_scores(response, double_story=False, keyword=None)
-                repeat_query = False
-            except:
+                response = get_response(self.model, prompt)
+            except Exception as e:
                 repeat_query = True
+                print(f"Error querying model. Error message: {e} Retrying...\n")
+                # time.sleep(90)
+                max_tries -= 1
+                if max_tries == 0: 
+                    raise e
+                continue
+
+            if self.verbose:
+                print(f"\nResponse:\n{response}\n")
+
+            try:
+                if self.query_mode == "score only":
+                    llmScore = self.parse_scores(response, double_story=False, keyword=None)
+                elif self.query_mode == "analyze rate":
+                    llmScore = self.parse_scores_advanced(response)
+                else:
+                    raise ValueError(f"Invalid query mode: {self.query_mode}")
+            except Exception as e:
+                repeat_query = True
+                print(f"Error parsing scores. Error message: {e} Retrying...\n")
                 max_tries -= 1
                 if max_tries == 0: 
                     llmScore = None
@@ -222,6 +277,8 @@ class ModelEvaluator():
         if llmScore is None:
             raise Exception(f"Error evaluating stories for premise:\n\n{premise}")
         else:
+            if self.verbose:
+                print(f"LLM score: {llmScore}\n")
             llmScore = sum(llmScore)
             return llmScore
             
@@ -237,6 +294,8 @@ class ModelEvaluator():
         prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.processData()
 
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
+
+        writers = ["BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
 
         return writers, train_set, test_set
 
@@ -330,13 +389,13 @@ class ModelEvaluator():
         for prompt in list(trainPrompt2Idx.keys())[:self.num_prompts_eval]:
             for writer in writers:
                 story = trainPrompt2Stories[prompt][writer]
-                model_scores[prompt][writer] = self.evaluteSingleStory(prompt, story)
+                model_scores[prompt][writer] = self.evaluate_single_story(prompt, story)
                 model_overall_scores[writer] += model_scores[prompt][writer]
                 print(f"Model score for {writer} on prompt {trainPrompt2Idx[prompt]}: {model_scores[prompt][writer]}")
 
                 # Hanlding the 60 quotas/min limit for gemini-pro
-                if self.model == "gemini-pro":
-                    time.sleep(0.3)
+                # if self.model == "gemini-pro":
+                #     time.sleep(0.0)
 
         # Compare writer models pair-wise to check whether the scorer model agrees with the human evaluation.
         cumu_acc = 0
