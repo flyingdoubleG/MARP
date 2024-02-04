@@ -109,8 +109,13 @@ class ModelEvaluator():
             
             # Placeholder for scores
             llm_score = []
-        
+            reached_ratings = False
             for line in lines:
+                if not reached_ratings:
+                    if bool(re.search(r'##Ratings##', line)):
+                        reached_ratings = True
+                    continue
+                
                 if bool(re.search(r'\*[^*]+\*', line)):
                     score = extract_first_number(line)
                     if score is None:
