@@ -13,13 +13,15 @@ litellm.vertex_location = "us-central1"
 # litellm.set_verbose=True
 
 # Helper function
-def get_response(model, message):
+def get_response(model, message, temperature=None, top_p=None):
     """
     Query the LLM model with a message and return the response.
     """
     response = litellm.completion(
         model=model,
         messages=[{"content": message, "role": "user"}],
+        temperature=temperature,
+        top_p=top_p,
     )
     return response.choices[0].message.content
 
@@ -72,7 +74,7 @@ def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
 
 class ModelEvaluator():
     def __init__(self, model, dataset_name, filepath, num_prompts_eval=3, 
-                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only"):
+                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only", temperature=None, top_p=None):
         """
         num_prompts_eval: number of prompts to evaluate
         num_categories: number of scoring categories to evaluate
@@ -91,6 +93,8 @@ class ModelEvaluator():
         self.eval_rounds = eval_rounds
         self.verbose = verbose
         self.query_mode = query_mode
+        self.temperature = temperature
+        self.top_p = top_p
 
         if dataset_name == "hanna":
             self.evaluate = self.evaluateHanna
@@ -240,7 +244,7 @@ class ModelEvaluator():
     
     def evaluate_single_story(self, premise, story):
         if self.query_mode == "score only":
-            prompt = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+            prompt = HANNA_SIMPLE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         elif self.query_mode == "analyze rate":
             prompt = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         else:
@@ -252,7 +256,7 @@ class ModelEvaluator():
             repeat_query = False
 
             try:
-                response = get_response(self.model, prompt)
+                response = get_response(self.model, prompt, temperature=self.temperature, top_p=self.top_p)
             except Exception as e:
                 repeat_query = True
                 print(f"Error querying model. Error message: {e} Retrying...\n")
@@ -445,3 +449,5 @@ class ModelEvaluator():
         print("Wrtier model ranking based on model evaluation:")
         for i in range(len(sorted_model_overall_scores)):
             print(f"{i+1}. {sorted_model_overall_scores[i][0]}: {sorted_model_overall_scores[i][1]}")
+
+        return(f"\nOverall Train Accuracy: {cumu_acc / acc_count}\n\n")
