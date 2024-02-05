@@ -12,6 +12,8 @@ HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE="Based on the following six attr
 
 HANNA_SIMPLE_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE="Based on the following six attributes:\n1. Relevance.\n2. Coherence.\n3. Empathy.\n4. Surprise.\n5. Engagement.\n6. Complexity.\nEvaluate the following story regarding the given evaluation criteria concisely, and then give an integer rating (from 1 to 5) to each attribute. Higher score means better.\n\nThe initial prompt: {}\n\nThe story: {}\n\nIn your response, please use the following format:\nAnalysis:\n###Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n"
 
+HANNA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE="Based on the following six attributes:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nGive an integer rating (from 1 to 5, higher means better) to each attribute of the following story first, and then give the explanation of the ratings.\n\nThe initial prompt: {}\n\nThe story: {}\n\nIn your response, please use the following format:\n###Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Explanations###:"
+
 
 QUARREL_PREMISE = "You will collaborate to create a story. The general setting: A Quarrel between two good friends about Iron Man."
 

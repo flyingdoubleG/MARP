@@ -73,9 +73,9 @@ if __name__ == '__main__':
 
     acc_list = []
     for i in range(5):
-        evaluator = ModelEvaluator('gpt-4-0125-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, query_mode="analyze rate", temperature=0.8)
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, query_mode="rate explain", temperature=0.8)
 
         acc_list.append(evaluator.evaluateModels())
     
     for acc in acc_list:
-        print(acc)
+        print(acc, "\n")

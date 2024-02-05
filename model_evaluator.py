@@ -113,25 +113,50 @@ class ModelEvaluator():
             
             # Placeholder for scores
             llm_score = []
-            reached_ratings = False
-            for line in lines:
-                if not reached_ratings:
-                    if bool(re.search(r'##Ratings##', line)):
-                        reached_ratings = True
-                    continue
-                
-                if bool(re.search(r'\*[^*]+\*', line)):
-                    score = extract_first_number(line)
-                    if score is None:
+
+            if self.query_mode == "analyze rate":
+                reached_ratings = False
+                for line in lines:
+                    if not reached_ratings:
+                        if bool(re.search(r'###Ratings###', line)):
+                            reached_ratings = True
                         continue
-                    else:
-                        llm_score.append(score)
+                    
+                    if bool(re.search(r'\*[^*]+\*', line)):
+                        score = extract_first_number(line)
+                        if score is None:
+                            continue
+                        else:
+                            llm_score.append(score)
+            
+            elif self.query_mode == "rate explain":
+                reached_ratings = False
+                reached_explanations = False
+                for line in lines:
+                    if not reached_ratings:
+                        if bool(re.search(r'##Ratings##', line)):
+                            reached_ratings = True
+                        continue
+                    elif not reached_explanations:
+                        if bool(re.search(r'##Explanations##', line)):
+                            reached_explanations = True
+                            break
+                    
+                    if bool(re.search(r'\*[^*]+\*', line)):
+                        score = extract_first_number(line)
+                        if score is None:
+                            continue
+                        else:
+                            llm_score.append(score)
+
+            else:
+                raise InvalidParameterError(f"Invalid mode: {self.query_mode}")
             
             if len(llm_score) != self.num_categories:
                 raise ValueError(f"Incorrect number of scoring categories for the story.\nThe current response is:\n{response}")
             return llm_score
         
-        except Exception as e:
+        except ValueError as e:
             # Handling any potential errors
             raise ValueError(f"Error parsing scores: {e}")
 
@@ -247,6 +272,8 @@ class ModelEvaluator():
             prompt = HANNA_SIMPLE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         elif self.query_mode == "analyze rate":
             prompt = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+        elif self.query_mode == "rate explain":
+            prompt = HANNA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         else:
             raise ValueError(f"Invalid query mode: {self.query_mode}")
 
@@ -272,13 +299,11 @@ class ModelEvaluator():
             try:
                 if self.query_mode == "score only":
                     llmScore = self.parse_scores(response, double_story=False, keyword=None)
-                elif self.query_mode == "analyze rate":
-                    llmScore = self.parse_scores_advanced(response)
                 else:
-                    raise ValueError(f"Invalid query mode: {self.query_mode}")
-            except Exception as e:
+                    llmScore = self.parse_scores_advanced(response)
+            except ValueError as e:
                 repeat_query = True
-                print(f"Error parsing scores. Error message: {e} Retrying...\n")
+                print(f"Error parsing scores. Error message: {e}\nRetrying...\n")
                 max_tries -= 1
                 if max_tries == 0: 
                     llmScore = None
@@ -450,4 +475,12 @@ class ModelEvaluator():
         for i in range(len(sorted_model_overall_scores)):
             print(f"{i+1}. {sorted_model_overall_scores[i][0]}: {sorted_model_overall_scores[i][1]}")
 
-        return(f"\nOverall Train Accuracy: {cumu_acc / acc_count}\n\n")
+        return(f"Overall Train Accuracy: {cumu_acc / acc_count}")
+
+ 
+class InvalidParameterError(Exception):
+    """Exception raised for errors due to invalid parameter values."""
+    
+    def __init__(self, message="Invalid parameter value"):
+        self.message = message
+        super().__init__(self.message)

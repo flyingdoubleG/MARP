@@ -35,15 +35,16 @@ if __name__ == '__main__':
 
     model_story = "I just want to tell you to go home. You will be fine. We're doing your next five minutes to reach the next building and feed on that mess that is the past you have made and you will lead a healthy life and that is something that I will teach you to have. Thanks for reading! ⁇ Have you ever tried r/WritingPrompts? More than ever you come up with a series of prompts that inspire you to write about the prompt, or the world you post. I don't do magic, but I write when I write about it. For example, to your friends of mine, I read a prompt that got a writing prompt and got asked to post it and my comment worked. No, I write about plants or science, and that answer is wrong. The ground is bigger than the sky, the elements in the universe are different, where you put you feet together, how you feel and what you taste, who you are, what you want, who you look like, etc etc etc etc etc etc. And it's not much of a *leoderie* and I can't say that it's a lovely thing, but I hope you like it, it's an enjoyable story. EDIT: A word word. ⁇"
 
-    PROMPT_TEMPLATE_1="Based on the following six attributes:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nEvaluate the following story regarding the given evaluation criteria concisely, and then give an integer rating (from 1 to 5) to each attribute. Higher score means better.\n\nThe initial prompt: {}\n\nThe story: {}\n\nIn your response, please use the following format:\nAnalysis:\n###Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n"
+    PROMPT_TEMPLATE_1="Based on the following six attributes:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nGive an integer rating (from 1 to 5, higher means better) to each attribute of the following story first, and then give the explanation of the ratings.\n\nThe initial prompt: {}\n\nThe story: {}\n\nIn your response, please use the following format:\n###Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Explanations###:"
 
-    # prompt = PROMPT_TEMPLATE_1.format(premise, human_story)
-    # print(prompt)
-    # print("=====================================================")
-    # # response = get_response('gpt-3.5-turbo-0125', prompt)
-    # # response = get_response('gpt-4-0125-preview', prompt)
+
+    prompt = PROMPT_TEMPLATE_1.format(premise, model_story)
+    print(prompt)
+    print("=====================================================")
+    response = get_response('gpt-3.5-turbo-0125', prompt)
+    # response = get_response('gpt-4-0125-preview', prompt)
     # response = get_response('gemini-pro', prompt)
-    # print(response)
+    print(response)
 
-    s = "*Relevance*: "
-    print(extract_first_number(s))
+    # s = "*Relevance*: "
+    # print(extract_first_number(s))
