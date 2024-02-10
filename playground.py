@@ -37,8 +37,10 @@ if __name__ == '__main__':
 
     PROMPT_TEMPLATE_1="Based on the following six attributes:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nGive an integer rating (from 1 to 5, higher means better) to each attribute of the following story first, and then give the explanation of the ratings.\n\nThe initial prompt: {}\n\nThe story: {}\n\nIn your response, please use the following format:\n###Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Explanations###:"
 
+    PROMPT_TEMPLATE_2 = "Based on the following six categories:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nEvaluate the following two stories by assigning an integer score (from 1 to 5) to each category. Higher score means better.\n\nThe initial premise of story is: {}\n\nStory1:\n{}\n\nStory2:\n{}.\n\nIn your response, please use the following format: \n###Story1 Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Story2 Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Explanations:###"
 
-    prompt = PROMPT_TEMPLATE_1.format(premise, model_story)
+
+    prompt = PROMPT_TEMPLATE_2.format(premise, human_story, model_story)
     print(prompt)
     print("=====================================================")
     response = get_response('gpt-3.5-turbo-0125', prompt)

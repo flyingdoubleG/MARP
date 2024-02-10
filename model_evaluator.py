@@ -3,7 +3,12 @@ import numpy as np
 import litellm
 import time
 import vertexai
-# from gemini import gemini_response, gemini_chat
+import pandas as pd
+from datasets import Dataset, load_dataset
+import os
+
+from comparison_task import ComparisonTask
+
 
 from standard_prompts import *
 from dataset_loader import DatasetLoader
@@ -11,6 +16,8 @@ from dataset_loader import DatasetLoader
 litellm.vertex_project = "multi-agent-411823"
 litellm.vertex_location = "us-central1"
 # litellm.set_verbose=True
+
+# from gemini import gemini_response, gemini_chat
 
 # Helper function
 def get_response(model, message, temperature=None, top_p=None):
@@ -36,40 +43,6 @@ def extract_first_number(text):
             return int(match.group(0))
         else:
             return None
-
-
-# Helper function
-def compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2):
-        """
-        Computes the model evaluation accuracy given the original and LLM scores.
-        """
-        assert len(scores1) == len(scores2) == len(llmScores1) == len(llmScores2)
-
-        scores1 = np.array(scores1)
-        scores2 = np.array(scores2)
-        llmScores1 = np.array(llmScores1)
-        llmScores2 = np.array(llmScores2)
-
-        scores1 = scores1.reshape([len(scores1), -1])
-        scores2 = scores2.reshape([len(scores2), -1])
-        llmScores1 = llmScores1.reshape([len(llmScores1), -1])
-        llmScores2 = llmScores2.reshape([len(llmScores2), -1])
-
-        assert len(scores1[0]) == len(scores2[0]) == len(llmScores1[0]) == len(llmScores2[0])
-
-        scores1 = scores1.sum(axis=1)
-        scores2 = scores2.sum(axis=1)
-        llmScores1 = llmScores1.sum(axis=1)
-        llmScores2 = llmScores2.sum(axis=1)
-
-        acc = 0
-        
-        for i in range(len(scores1)):
-            if (scores1[i] - scores2[i]) * (llmScores1[i] - llmScores2[i]) > 0:
-                acc += 1
-            elif (scores1[i] - scores2[i]) == (llmScores1[i] - llmScores2[i]) == 0:
-                acc += 1
-        return acc / len(scores1)
 
 
 class ModelEvaluator():
@@ -99,9 +72,49 @@ class ModelEvaluator():
         if dataset_name == "hanna":
             self.evaluate = self.evaluateHanna
             self.evaluateModels = self.evaluateModelsHanna
+            self.collect_data = self.collect_data_hanna
             self.num_all_prompts = 96
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
+        
+    def compute_model_eval_acc(self, scores1, scores2, llmScores1, llmScores2, writer1, writer2, prompts):
+        """
+        Computes the model evaluation accuracy given the human and LLM scores.
+        """
+        assert len(scores1) == len(scores2) == len(llmScores1) == len(llmScores2)
+
+        scores1 = np.array(scores1)
+        scores2 = np.array(scores2)
+        llmScores1 = np.array(llmScores1)
+        llmScores2 = np.array(llmScores2)
+
+        scores1 = scores1.reshape([len(scores1), -1])
+        scores2 = scores2.reshape([len(scores2), -1])
+        llmScores1 = llmScores1.reshape([len(llmScores1), -1])
+        llmScores2 = llmScores2.reshape([len(llmScores2), -1])
+
+        assert len(scores1[0]) == len(scores2[0]) == len(llmScores1[0]) == len(llmScores2[0])
+
+        scores1 = scores1.sum(axis=1)
+        scores2 = scores2.sum(axis=1)
+        llmScores1 = llmScores1.sum(axis=1)
+        llmScores2 = llmScores2.sum(axis=1)
+
+        acc = 0
+        comparison_tasks = []
+
+        for i in range(len(scores1)):
+            if (scores1[i] > scores2[i]) and (llmScores1[i] > llmScores2[i]):
+                acc += 1
+                comparison_tasks.append(ComparisonTask(self.model, "win", "win", writer1, writer2, prompts[i]))
+            elif (scores1[i] <= scores2[i]) and (llmScores1[i] <= llmScores2[i]):
+                acc += 1
+                comparison_tasks.append(ComparisonTask(self.model, "lose", "lose", writer1, writer2, prompts[i]))
+            elif (scores1[i] > scores2[i]) and (llmScores1[i] <= llmScores2[i]):
+                comparison_tasks.append(ComparisonTask(self.model, "win", "lose", writer1, writer2, prompts[i]))
+            else:
+                comparison_tasks.append(ComparisonTask(self.model, "lose", "win", writer1, writer2, prompts[i]))
+        return acc / len(scores1), comparison_tasks
 
     def parse_scores_advanced(self, response):
         """
@@ -242,7 +255,12 @@ class ModelEvaluator():
             story1 = stories1[i]
             story2 = stories2[i]
 
-            prompt = HANNA_RATE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+            if self.query_mode == "score only":
+                prompt = HANNA_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+            elif self.query_mode == "analyze rate":
+                prompt = HANNA_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+            elif self.query_mode == "rate explain":
+                prompt = HANNA_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
 
             repeat_query = True
             max_tries = 5
@@ -329,7 +347,7 @@ class ModelEvaluator():
 
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
-        writers = ["BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
+        writers = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
 
         return writers, train_set, test_set
 
@@ -338,8 +356,12 @@ class ModelEvaluator():
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
 
+        comparison_tasks = []
+
         acc = 0
         acc_count = 0
+        prompts = list(trainPrompt2Idx.keys())[:self.num_prompts_eval]
+        
         for i in range(len(writers)):
             writer1 = writers[i]
             for j in range(i+1, len(writers)):
@@ -349,8 +371,9 @@ class ModelEvaluator():
                 scores2 = []
                 stories1 = []
                 stories2 = []
-                
-                for prompt in list(trainPrompt2Idx.keys())[:self.num_prompts_eval]:
+
+                # Initialize the premises, stories, and human scores into corresponding lists.
+                for prompt in prompts:
                     premises.append(prompt)
                     stories1.append(trainPrompt2Stories[prompt][writer1])
                     stories2.append(trainPrompt2Stories[prompt][writer2])
@@ -370,7 +393,8 @@ class ModelEvaluator():
                         llmScores2 += tmp_llmScores2
                         llmScores1 += tmp_llmScores1
 
-                tmp_acc = compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2)
+                tmp_acc, tmp_comparison_tasks = self.compute_model_eval_acc(scores1, scores2, llmScores1, llmScores2, writer1, writer2, prompts)
+                comparison_tasks.extend(tmp_comparison_tasks)
                 acc += tmp_acc
                 acc_count += 1
                 print(f"Train Accuracy for {writer1} vs {writer2}: {tmp_acc}; cumulative accuracy: {acc / acc_count}")
@@ -379,6 +403,7 @@ class ModelEvaluator():
         acc /= (len(writers) * (len(writers) - 1) / 2)
         print(f"\nOverall Train Accuracy: {acc}")
         assert acc_count == len(writers) * (len(writers) - 1) / 2
+        return f"Overall Train Accuracy: {acc}", comparison_tasks
 
     @staticmethod
     def sort_model_by_score(overall_scores: dict) -> list:
@@ -475,9 +500,37 @@ class ModelEvaluator():
         for i in range(len(sorted_model_overall_scores)):
             print(f"{i+1}. {sorted_model_overall_scores[i][0]}: {sorted_model_overall_scores[i][1]}")
 
-        return(f"Overall Train Accuracy: {cumu_acc / acc_count}")
+        return f"Overall Train Accuracy: {cumu_acc / acc_count}"
+    
+    def collect_data_hanna(self, hub_url: str = None):
+        """
+        Collect model evaluation data and human evaluation data for the selected number of prompts. Form these data into Panda dataframes.
+        """
+        acc_string, comparison_tasks = self.evaluateHanna()
 
- 
+        data = [{
+            'task_id': task.task_id,
+            'worker_id': task.worker_id,
+            'human_label': task.human_label,
+            'llm_label': task.llm_label,
+            'generator_1': task.generator_1,
+            'generator_2': task.generator_2,
+            'premise': task.premise
+        } for task in comparison_tasks]
+
+        df = pd.DataFrame(data)
+
+        try:
+            hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
+            if hub_url is not None:
+                dataset = Dataset.from_pandas(df)
+                dataset.push_to_hub(repo_id=hub_url, token=hf_write_token)
+        except Exception as e:
+            print(f"Error pushing to hub: {e}")
+        
+        return df
+
+
 class InvalidParameterError(Exception):
     """Exception raised for errors due to invalid parameter values."""
     
