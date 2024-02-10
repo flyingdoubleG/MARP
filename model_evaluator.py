@@ -115,6 +115,64 @@ class ModelEvaluator():
             else:
                 comparison_tasks.append(ComparisonTask(self.model, "lose", "win", writer1, writer2, prompts[i]))
         return acc / len(scores1), comparison_tasks
+    
+    def parse_double_scores_advanced(self, response):
+        """
+        Parse scores for two stories evaluated together.
+        """
+        try:
+            # Splitting the response by newlines
+            lines = response.strip().split('\n')
+            
+            # Placeholder for scores
+            llm_attr_scores1, llm_attr_scores2 = [], []
+
+            reached_ratings1 = False
+            reached_ratings2 = False
+            reached_explanations = False
+
+            if self.query_mode  == "rate explain":
+                for line in lines:
+                    # This trio-if block is used to identify what is the nature of the current line
+                    if not reached_ratings1:
+                        if bool(re.search(r'##Story1 Ratings##', line)):
+                            reached_ratings1 = True
+                            continue
+                        else:
+                            continue # We use continue here to emphasize the logic. The Story1 Ratings section has not been reached yet, so we can directly proceed to the next line.
+                    elif not reached_ratings2:
+                        if bool(re.search(r'##Story2 Ratings##', line)):
+                            reached_ratings2 = True
+                            # If the current line is the start of the Story2 Ratings section, continue to the next line after recognizing it
+                            continue
+                        # Even if the current line is not the start of the Story2 Ratings section, we can still proceed for further processing.
+                    elif not reached_explanations:
+                        if bool(re.search(r'##Explanations##', line)):
+                            reached_explanations = True
+                            break
+                    
+                    assert reached_ratings1
+                    if bool(re.search(r'\*[^*]+\*', line)):
+                        score = extract_first_number(line)
+                        if score is None:
+                            continue
+                        if reached_ratings2:
+                            llm_attr_scores2.append(score)
+                        elif reached_ratings1:
+                            llm_attr_scores1.append(score)
+            elif self.query_mode == "analyze rate":
+                pass
+            else:
+                raise InvalidParameterError(f"Invalid query mode: {self.query_mode}")
+
+            
+            if not (len(llm_attr_scores1) == len(llm_attr_scores2) == self.num_categories):
+                raise ValueError(f"Incorrect number of scoring categories for the story.\nThe current response is:\n{response}")
+            return llm_attr_scores1, llm_attr_scores2
+        
+        except ValueError as e:
+            # Handling any potential errors
+            raise ValueError(f"Error parsing scores: {e}")
 
     def parse_scores_advanced(self, response):
         """
@@ -131,9 +189,11 @@ class ModelEvaluator():
                 reached_ratings = False
                 for line in lines:
                     if not reached_ratings:
-                        if bool(re.search(r'###Ratings###', line)):
+                        if bool(re.search(r'##Ratings##', line)):
                             reached_ratings = True
-                        continue
+                            continue
+                        else:
+                            continue
                     
                     if bool(re.search(r'\*[^*]+\*', line)):
                         score = extract_first_number(line)
@@ -149,7 +209,9 @@ class ModelEvaluator():
                     if not reached_ratings:
                         if bool(re.search(r'##Ratings##', line)):
                             reached_ratings = True
-                        continue
+                            continue
+                        else:
+                            continue
                     elif not reached_explanations:
                         if bool(re.search(r'##Explanations##', line)):
                             reached_explanations = True
@@ -261,15 +323,37 @@ class ModelEvaluator():
                 prompt = HANNA_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
             elif self.query_mode == "rate explain":
                 prompt = HANNA_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+            else:
+                raise ValueError(f"Invalid query mode: {self.query_mode}")
 
             repeat_query = True
             max_tries = 5
             while repeat_query and max_tries > 0:
-                response = get_response(self.model, prompt)
+                repeat_query = False
+
+                # Try getting response from LLM
                 try:
-                    llmScore1, llmScore2 = self.parse_scores(response, double_story=True, keyword="Story")
-                    repeat_query = False
-                except:
+                    response = get_response(self.model, prompt, temperature=self.temperature, top_p=self.top_p)
+                except Exception as e:
+                    repeat_query = True
+                    print(f"Error querying model. Error message: {e}\n Retrying...\n")
+                    # time.sleep(90)
+                    max_tries -= 1
+                    if max_tries == 0: 
+                        raise e
+                    continue
+
+                # Try parsing the LLM response
+                try:
+                    if self.query_mode == "score only":
+                        llmScore1, llmScore2 = self.parse_scores(response, double_story=True, keyword="Story")
+                    elif self.query_mode == "analyze rate":
+                        llmScore1, llmScore2 = self.parse_double_scores_advanced(response)
+                    elif self.query_mode == "rate explain":
+                        llmScore1, llmScore2 = self.parse_double_scores_advanced(response)
+
+                except Exception as e:
+                    print(f"Error parsing scores. Error message: {e}\nRetrying...\n")
                     repeat_query = True
                     max_tries -= 1
                     if max_tries == 0:
@@ -304,7 +388,7 @@ class ModelEvaluator():
                 response = get_response(self.model, prompt, temperature=self.temperature, top_p=self.top_p)
             except Exception as e:
                 repeat_query = True
-                print(f"Error querying model. Error message: {e} Retrying...\n")
+                print(f"Error querying model. Error message: {e}\n Retrying...\n")
                 # time.sleep(90)
                 max_tries -= 1
                 if max_tries == 0: 
@@ -334,9 +418,8 @@ class ModelEvaluator():
             llmScore = sum(llmScore)
             return llmScore
             
-    
     def evaluatePrefixHanna(self):
-        NUM_TRAIN = self.num_all_prompts // 2
+        NUM_TRAIN = self.num_all_prompts
         assert self.num_prompts_eval <= NUM_TRAIN
 
         writers = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
@@ -347,7 +430,7 @@ class ModelEvaluator():
 
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
-        writers = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
+        writers = ["BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
 
         return writers, train_set, test_set
 
@@ -473,10 +556,10 @@ class ModelEvaluator():
                     llm_score1 = model_scores[prompt][writer1]
                     llm_score2 = model_scores[prompt][writer2]
 
-                    if (human_score1 - human_score2) * (llm_score1 - llm_score2) > 0:
+                    if (human_score1 > human_score2) and (llm_score1 > llm_score2):
                         acc += 1
                         cumu_acc += 1
-                    elif (human_score1 - human_score2) == (llm_score1 - llm_score2) == 0:
+                    elif (human_score1 <= human_score2) and (llm_score1 <= llm_score2):
                         acc += 1
                         cumu_acc += 1
                     
@@ -521,8 +604,8 @@ class ModelEvaluator():
         df = pd.DataFrame(data)
 
         try:
-            hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
             if hub_url is not None:
+                hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
                 dataset = Dataset.from_pandas(df)
                 dataset.push_to_hub(repo_id=hub_url, token=hf_write_token)
         except Exception as e:
