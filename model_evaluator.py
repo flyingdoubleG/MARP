@@ -392,7 +392,7 @@ class ModelEvaluator():
     
     def evaluate_single_story(self, premise, story):
         if self.query_mode == "score only":
-            prompt = HANNA_SIMPLE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+            prompt = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         elif self.query_mode == "analyze rate":
             prompt = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
         elif self.query_mode == "rate explain":

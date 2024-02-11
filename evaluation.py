@@ -59,11 +59,10 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 
 if __name__ == '__main__':
-    print("Hanna, GPT-3.5-turbo-0125, 5 prompts, analyze rate, no human writers")
-    print("\n\n")
+    print("Hanna, gemini_pro, 10 prompts, rate explain, single scoring, no human writers")
+    print("\n")
 
-    # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', 
-    #                            num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate")
+    evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only")
 
     # evaluator = ModelEvaluator('gpt-4-0125-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, query_mode="analyze rate", temperature=0.8)
 
@@ -73,71 +72,71 @@ if __name__ == '__main__':
     #                            'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
 
     # evaluator.evaluate()
-    # evaluator.evaluateModels()
+    evaluator.evaluateModels()
 
     # df = evaluator.collect_data(hub_url='llm-aes/toy1_dataset_hanna_2_prompts')
     # print(df)
 
-    print("=====================================================")
-    print("Bidirectional evaluation")
-    print("=====================================================")
-    print("\n\n")
+    # print("=====================================================")
+    # print("Bidirectional evaluation")
+    # print("=====================================================")
+    # print("\n\n")
 
-    acc_list = []
-    for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
+    # acc_list = []
+    # for i in range(5):
+    #     evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
 
-        acc_string, _ = evaluator.evaluate()
-        acc_list.append(acc_string)
+    #     acc_string, _ = evaluator.evaluate()
+    #     acc_list.append(acc_string)
 
-    print("\n")
-    for acc in acc_list:
-        print(acc, "\n")
+    # print("\n")
+    # for acc in acc_list:
+    #     print(acc, "\n")
 
-    print("=====================================================")
-    print("Single directional evaluation")
-    print("=====================================================")
-    print("\n\n")
+    # print("=====================================================")
+    # print("Single directional evaluation")
+    # print("=====================================================")
+    # print("\n\n")
 
-    acc_list = []
-    for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate")
+    # acc_list = []
+    # for i in range(5):
+    #     evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate")
 
-        acc_string, _ = evaluator.evaluate()
-        acc_list.append(acc_string)
+    #     acc_string, _ = evaluator.evaluate()
+    #     acc_list.append(acc_string)
     
-    print("\n")
-    for acc in acc_list:
-        print(acc, "\n")
+    # print("\n")
+    # for acc in acc_list:
+    #     print(acc, "\n")
 
-    print("=====================================================")
-    print("Bidirectional evaluation, temp=0.8")
-    print("=====================================================")
-    print("\n\n")
+    # print("=====================================================")
+    # print("Bidirectional evaluation, temp=0.8")
+    # print("=====================================================")
+    # print("\n\n")
 
-    acc_list = []
-    for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
+    # acc_list = []
+    # for i in range(5):
+    #     evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
 
-        acc_string, _ = evaluator.evaluate()
-        acc_list.append(acc_string)
+    #     acc_string, _ = evaluator.evaluate()
+    #     acc_list.append(acc_string)
 
-    print("\n")
-    for acc in acc_list:
-        print(acc, "\n")
+    # print("\n")
+    # for acc in acc_list:
+    #     print(acc, "\n")
 
-    print("=====================================================")
-    print("Single directional evaluation, temp=0.8")
-    print("=====================================================")
-    print("\n\n")
+    # print("=====================================================")
+    # print("Single directional evaluation, temp=0.8")
+    # print("=====================================================")
+    # print("\n\n")
 
-    acc_list = []
-    for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
+    # acc_list = []
+    # for i in range(5):
+    #     evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
 
-        acc_string, _ = evaluator.evaluate()
-        acc_list.append(acc_string)
+    #     acc_string, _ = evaluator.evaluate()
+    #     acc_list.append(acc_string)
     
-    print("\n")
-    for acc in acc_list:
-        print(acc, "\n")
+    # print("\n")
+    # for acc in acc_list:
+    #     print(acc, "\n")
