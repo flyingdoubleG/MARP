@@ -59,7 +59,7 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 
 if __name__ == '__main__':
-    print("Hanna, GPT-3.5-turbo-0125, 5 prompts, rate explain, no human writers")
+    print("Hanna, GPT-3.5-turbo-0125, 5 prompts, analyze rate, no human writers")
     print("\n\n")
 
     # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', 
@@ -67,7 +67,7 @@ if __name__ == '__main__':
 
     # evaluator = ModelEvaluator('gpt-4-0125-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, query_mode="analyze rate", temperature=0.8)
 
-    # evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="rate explain")
+    # evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
 
     # evaluator = ModelEvaluator('anyscale/mistralai/Mistral-7B-Instruct-v0.1', 'hanna', 
     #                            'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     acc_list = []
     for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="rate explain")
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
 
         acc_string, _ = evaluator.evaluate()
         acc_list.append(acc_string)
@@ -101,7 +101,39 @@ if __name__ == '__main__':
 
     acc_list = []
     for i in range(5):
-        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="rate explain")
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate")
+
+        acc_string, _ = evaluator.evaluate()
+        acc_list.append(acc_string)
+    
+    print("\n")
+    for acc in acc_list:
+        print(acc, "\n")
+
+    print("=====================================================")
+    print("Bidirectional evaluation, temp=0.8")
+    print("=====================================================")
+    print("\n\n")
+
+    acc_list = []
+    for i in range(5):
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
+
+        acc_string, _ = evaluator.evaluate()
+        acc_list.append(acc_string)
+
+    print("\n")
+    for acc in acc_list:
+        print(acc, "\n")
+
+    print("=====================================================")
+    print("Single directional evaluation, temp=0.8")
+    print("=====================================================")
+    print("\n\n")
+
+    acc_list = []
+    for i in range(5):
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="analyze rate", temperature=0.8)
 
         acc_string, _ = evaluator.evaluate()
         acc_list.append(acc_string)

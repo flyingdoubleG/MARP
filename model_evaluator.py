@@ -135,19 +135,19 @@ class ModelEvaluator():
                 for line in lines:
                     # This trio-if block is used to identify what is the nature of the current line
                     if not reached_ratings1:
-                        if bool(re.search(r'##Story1 Ratings##', line)):
+                        if bool(re.search(r'##\s*Story\s*1\s*Ratings\s*##', line)):
                             reached_ratings1 = True
                             continue
                         else:
                             continue # We use continue here to emphasize the logic. The Story1 Ratings section has not been reached yet, so we can directly proceed to the next line.
                     elif not reached_ratings2:
-                        if bool(re.search(r'##Story2 Ratings##', line)):
+                        if bool(re.search(r'##\s*Story\s*2\s*Ratings\s*##', line)):
                             reached_ratings2 = True
                             # If the current line is the start of the Story2 Ratings section, continue to the next line after recognizing it
                             continue
                         # Even if the current line is not the start of the Story2 Ratings section, we can still proceed for further processing.
                     elif not reached_explanations:
-                        if bool(re.search(r'##Explanations##', line)):
+                        if bool(re.search(r'##\s*Explanations\s*##', line)):
                             reached_explanations = True
                             break
                     
@@ -161,7 +161,28 @@ class ModelEvaluator():
                         elif reached_ratings1:
                             llm_attr_scores1.append(score)
             elif self.query_mode == "analyze rate":
-                pass
+                for line in lines:
+                    # This trio-if block is used to identify what is the nature of the current line
+                    if not reached_ratings1:
+                        if bool(re.search(r'##\s*Story\s*1\s*Ratings\s*##', line)):
+                            reached_ratings1 = True
+                            continue
+                        else:
+                            continue # We use continue here to emphasize the logic. The Story1 Ratings section has not been reached yet, so we can directly proceed to the next line.
+                    elif not reached_ratings2:
+                        if bool(re.search(r'##\s*Story\s*2\s*Ratings\s*##', line)):
+                            reached_ratings2 = True
+                            # If the current line is the start of the Story2 Ratings section, continue to the next line after recognizing it
+                            continue
+                    
+                    if bool(re.search(r'\*[^*]+\*', line)):
+                        score = extract_first_number(line)
+                        if score is None:
+                            continue
+                        if reached_ratings2:
+                            llm_attr_scores2.append(score)
+                        elif reached_ratings1:
+                            llm_attr_scores1.append(score)
             else:
                 raise InvalidParameterError(f"Invalid query mode: {self.query_mode}")
 
@@ -189,7 +210,7 @@ class ModelEvaluator():
                 reached_ratings = False
                 for line in lines:
                     if not reached_ratings:
-                        if bool(re.search(r'##Ratings##', line)):
+                        if bool(re.search(r'##\s*Ratings\s*##', line)):
                             reached_ratings = True
                             continue
                         else:
@@ -207,13 +228,13 @@ class ModelEvaluator():
                 reached_explanations = False
                 for line in lines:
                     if not reached_ratings:
-                        if bool(re.search(r'##Ratings##', line)):
+                        if bool(re.search(r'##\s*Ratings\s*##', line)):
                             reached_ratings = True
                             continue
                         else:
                             continue
                     elif not reached_explanations:
-                        if bool(re.search(r'##Explanations##', line)):
+                        if bool(re.search(r'##\s*Explanations\s*##', line)):
                             reached_explanations = True
                             break
                     
