@@ -59,23 +59,33 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 
 if __name__ == '__main__':
-    print("Hanna, gemini_pro, 10 prompts, rate explain, single scoring, no human writers")
-    print("\n")
+    print("meva, gpt-3.5-turbo-0125, 200 prompts, 3 query modes, double scoring\n")
 
-    evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only")
+    # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=10, num_categories=6, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only")
 
     # evaluator = ModelEvaluator('gpt-4-0125-preview', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=5, num_categories=6, bidir_eval=False, eval_rounds=1, query_mode="analyze rate", temperature=0.8)
 
-    # evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
+    # evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'meva', 'meva/mans_wp.json', num_prompts_eval=5, num_categories=1, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="analyze rate")
 
     # evaluator = ModelEvaluator('anyscale/mistralai/Mistral-7B-Instruct-v0.1', 'hanna', 
     #                            'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1)
 
     # evaluator.evaluate()
-    evaluator.evaluateModels()
+    # evaluator.evaluate_models()
 
-    # df = evaluator.collect_data(hub_url='llm-aes/toy1_dataset_hanna_2_prompts')
-    # print(df)
+    query_modes = ["analyze rate", "score only", "rate explain"]
+    urls = ['llm-aes/meva_full_analyze_rate', 'llm-aes/meva_full_score_only', 'llm-aes/meva_full_rate_explain']
+
+    for query_mode, url in zip(query_modes, urls):
+        print("=====================================================")
+        print(f"meva, query mode: {query_mode}")
+        print("=====================================================")
+        evaluator = ModelEvaluator('gpt-3.5-turbo-0125', 'meva', 'meva/mans_wp.json', num_prompts_eval=2, num_categories=1, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode)
+
+        df = evaluator.collect_data(hub_url=url)
+        df.to_csv(f'df/meva_full_{query_mode}.csv', index=False)
+        print(df)
+        print("\n")
 
     # print("=====================================================")
     # print("Bidirectional evaluation")

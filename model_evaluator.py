@@ -47,7 +47,7 @@ def extract_first_number(text):
 
 class ModelEvaluator():
     def __init__(self, model, dataset_name, filepath, num_prompts_eval=3, 
-                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only", temperature=None, top_p=None):
+                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only", temperature=None, top_p=None, special_mark=""):
         """
         num_prompts_eval: number of prompts to evaluate
         num_categories: number of scoring categories to evaluate
@@ -68,12 +68,39 @@ class ModelEvaluator():
         self.query_mode = query_mode
         self.temperature = temperature
         self.top_p = top_p
+        self.special_mark = special_mark
 
         if dataset_name == "hanna":
-            self.evaluate = self.evaluateHanna
-            self.evaluateModels = self.evaluateModelsHanna
-            self.collect_data = self.collect_data_hanna
+            self.evaluate_prefix = self.evaluate_prefix_hanna
             self.num_all_prompts = 96
+
+            self.rate_double_essay_prompt_template = HANNA_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.analyze_rate_double_essay_prompt_template = HANNA_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.rate_explain_double_essay_prompt_template = HANNA_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE
+
+            self.rate_single_essay_prompt_template = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE
+
+            self.analyze_rate_single_essay_prompt_template = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE
+
+            self.rate_explain_single_essay_prompt_template = HANNA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE
+
+        elif dataset_name == "meva":
+            self.evaluate_prefix = self.evaluate_prefix_meva
+            self.num_all_prompts = 200
+
+            self.rate_double_essay_prompt_template = MEVA_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.analyze_rate_double_essay_prompt_template = MEVA_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.rate_explain_double_essay_prompt_template = MEVA_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE
+
+            # self.rate_single_essay_prompt_template = MEVA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE
+
+            # self.analyze_rate_single_essay_prompt_template = MEVA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE
+
+            # self.rate_explain_single_essay_prompt_template = MEVA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -103,17 +130,18 @@ class ModelEvaluator():
         acc = 0
         comparison_tasks = []
 
+        evaluator_name = self.model + "-" + self.query_mode.replace(" ", "-") + self.special_mark
         for i in range(len(scores1)):
             if (scores1[i] > scores2[i]) and (llmScores1[i] > llmScores2[i]):
                 acc += 1
-                comparison_tasks.append(ComparisonTask(self.model, "win", "win", writer1, writer2, prompts[i]))
+                comparison_tasks.append(ComparisonTask(evaluator_name, "win", "win", writer1, writer2, prompts[i]))
             elif (scores1[i] <= scores2[i]) and (llmScores1[i] <= llmScores2[i]):
                 acc += 1
-                comparison_tasks.append(ComparisonTask(self.model, "lose", "lose", writer1, writer2, prompts[i]))
+                comparison_tasks.append(ComparisonTask(evaluator_name, "lose", "lose", writer1, writer2, prompts[i]))
             elif (scores1[i] > scores2[i]) and (llmScores1[i] <= llmScores2[i]):
-                comparison_tasks.append(ComparisonTask(self.model, "win", "lose", writer1, writer2, prompts[i]))
+                comparison_tasks.append(ComparisonTask(evaluator_name, "win", "lose", writer1, writer2, prompts[i]))
             else:
-                comparison_tasks.append(ComparisonTask(self.model, "lose", "win", writer1, writer2, prompts[i]))
+                comparison_tasks.append(ComparisonTask(evaluator_name, "lose", "win", writer1, writer2, prompts[i]))
         return acc / len(scores1), comparison_tasks
     
     def parse_double_scores_advanced(self, response):
@@ -339,11 +367,11 @@ class ModelEvaluator():
             story2 = stories2[i]
 
             if self.query_mode == "score only":
-                prompt = HANNA_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+                prompt = self.rate_double_essay_prompt_template.format(premise, story1, story2)
             elif self.query_mode == "analyze rate":
-                prompt = HANNA_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+                prompt = self.analyze_rate_double_essay_prompt_template.format(premise, story1, story2)
             elif self.query_mode == "rate explain":
-                prompt = HANNA_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(premise, story1, story2)
+                prompt = self.rate_explain_double_essay_prompt_template.format(premise, story1, story2)
             else:
                 raise ValueError(f"Invalid query mode: {self.query_mode}")
 
@@ -392,11 +420,11 @@ class ModelEvaluator():
     
     def evaluate_single_story(self, premise, story):
         if self.query_mode == "score only":
-            prompt = HANNA_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+            prompt = self.rate_single_essay_prompt_template.format(premise, story)
         elif self.query_mode == "analyze rate":
-            prompt = HANNA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+            prompt = self.analyze_rate_single_essay_prompt_template.format(premise, story)
         elif self.query_mode == "rate explain":
-            prompt = HANNA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE.format(premise, story)
+            prompt = self.rate_explain_single_essay_prompt_template.format(premise, story)
         else:
             raise ValueError(f"Invalid query mode: {self.query_mode}")
 
@@ -439,7 +467,7 @@ class ModelEvaluator():
             llmScore = sum(llmScore)
             return llmScore
             
-    def evaluatePrefixHanna(self):
+    def evaluate_prefix_hanna(self):
         NUM_TRAIN = self.num_all_prompts
         assert self.num_prompts_eval <= NUM_TRAIN
 
@@ -447,16 +475,32 @@ class ModelEvaluator():
 
         loader = DatasetLoader(self.dataset_name, self.filepath, writers)
 
-        prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.processData()
+        prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
 
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
         writers = ["BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
 
         return writers, train_set, test_set
+    
+    def evaluate_prefix_meva(self):
+        NUM_TRAIN = self.num_all_prompts
+        assert self.num_prompts_eval <= NUM_TRAIN
 
-    def evaluateHanna(self):
-        writers, train_set, test_set = self.evaluatePrefixHanna()
+        writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+
+        loader = DatasetLoader(self.dataset_name, self.filepath, writers)
+
+        prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
+
+        train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
+
+        writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+
+        return writers, train_set, test_set
+
+    def evaluate(self):
+        writers, train_set, test_set = self.evaluate_prefix()
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
 
@@ -520,13 +564,13 @@ class ModelEvaluator():
         # sorted_scores is now a list of tuples sorted by the score
         return sorted_scores
 
-    def evaluateModelsHanna(self):
+    def evaluate_models(self):
         """
         Compare the overall story generation performance of different models (including possibly human) on a given number of prompts. The total human-evaluted scores for the stories generated by each model are averaged. The models are then ranked from the best to the worst based on the average scores.
         
         return: a list of (model, accuracy) tuples, sorted by accuracy from highest to lowest.
         """
-        writers, train_set, test_set = self.evaluatePrefixHanna()
+        writers, train_set, test_set = self.evaluate_prefix()
 
         trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories = train_set
         testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories = test_set
@@ -606,11 +650,11 @@ class ModelEvaluator():
 
         return f"Overall Train Accuracy: {cumu_acc / acc_count}"
     
-    def collect_data_hanna(self, hub_url: str = None):
+    def collect_data(self, hub_url: str = None):
         """
         Collect model evaluation data and human evaluation data for the selected number of prompts. Form these data into Panda dataframes.
         """
-        acc_string, comparison_tasks = self.evaluateHanna()
+        acc_string, comparison_tasks = self.evaluate()
 
         data = [{
             'task_id': task.task_id,

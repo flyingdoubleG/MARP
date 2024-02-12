@@ -1,4 +1,5 @@
 import csv
+import json
 
 
 class DatasetLoader:
@@ -13,12 +14,17 @@ class DatasetLoader:
             self.num_prompts = 96
             self.num_human_evaluators = 3
             self.num_categories = 6
-            self.processData = self.processDataHanna
+            self.process_data = self.process_data_hanna
+        elif dataset_name == "meva":
+            self.num_prompts = 200
+            self.num_human_evaluators = 5
+            self.num_categories = 1
+            self.process_data = self.process_data_meva
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
     @staticmethod
-    def loadCSV(filepath):
+    def load_csv(filepath):
         """
         Load a csv file. The first line of the CSV file are the column names.
         Then each subsequent line is a row of data.
@@ -36,12 +42,12 @@ class DatasetLoader:
 
         return column_names, data
 
-    def processDataHanna(self):
+    def process_data_hanna(self):
         """
         Load the dataset. The first line of the CSV file are the column names.
         Then each subsequent line is a row of data.
         """
-        column_names, data = DatasetLoader.loadCSV(self.filepath)
+        column_names, data = DatasetLoader.load_csv(self.filepath)
         writers = self.writers
 
         idx2Prompt = {}
@@ -90,6 +96,58 @@ class DatasetLoader:
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
     
+    def process_data_meva(self):
+        writers = self.writers
+        assert len(writers) == 5
+
+        idx2Prompt = {}
+        prompt2Idx = {}
+        prompt2Scores = {}
+        prompt2Stories = {}
+
+        # Helper dictionary to ensure each writer only writes for a prompt once.
+        prompt2AddCount = {}
+        prompt2Stories = {}
+
+        with open(self.filepath, 'r') as file:
+            data = json.load(file)
+
+        idx = 0
+        for key in data:
+            entry = data[key]
+            prompt = entry["prompt"].strip()
+            if prompt not in prompt2Idx:
+                prompt2Idx[prompt] = idx
+                idx2Prompt[idx] = prompt
+                idx += 1
+                prompt2Scores[prompt] = {}
+                prompt2AddCount[prompt] = {}
+                prompt2Stories[prompt] = {}
+                for writer in writers:
+                    prompt2Scores[prompt][writer] = 0
+                    prompt2AddCount[prompt][writer] = 0
+            else:
+                raise ValueError(f"Prompt {prompt} already exists in the dataset.")
+
+            gen = entry["gen"]
+            for writer in writers:
+                writer_data = gen[writer]
+                writer_story = writer_data["text"]
+                writer_score = sum(writer_data["score"])
+                
+                prompt2Scores[prompt][writer] += writer_score
+                prompt2AddCount[prompt][writer] += 1
+                prompt2Stories[prompt][writer] = writer_story.strip()
+        
+        assert idx == self.num_prompts == 200
+        for value in prompt2AddCount.values():
+            for writer in writers:
+                assert value[writer] == 1
+        
+        assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
+
+        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+    
     @staticmethod
     def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
         """
@@ -122,3 +180,9 @@ class DatasetLoader:
         assert len(testPrompt2Idx) == len(testIdx2Prompt) == len(testPrompt2Scores) == len(testPrompt2Stories) == len(prompt2Idx) - num_train
 
         return [trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories], [testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories]
+    
+if __name__ == "__main__":
+    writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+    path = "meva/mans_wp.json"
+    loader = DatasetLoader("meva", path, writers)
+    loader.process_data()

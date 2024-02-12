@@ -1,0 +1,21 @@
+task_id,worker_id,human_label,llm_label,generator_1,generator_2,premise
+t_41,w_gpt-3.5-turbo-0125,0,1,gpt,plan_write,Write the saddest story you can make from the perspective of an animal .
+t_42,w_gpt-3.5-turbo-0125,0,0,gpt,plan_write,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_43,w_gpt-3.5-turbo-0125,0,1,gpt,s2s,Write the saddest story you can make from the perspective of an animal .
+t_44,w_gpt-3.5-turbo-0125,0,1,gpt,s2s,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_45,w_gpt-3.5-turbo-0125,1,1,gpt,gpt_kg,Write the saddest story you can make from the perspective of an animal .
+t_46,w_gpt-3.5-turbo-0125,1,1,gpt,gpt_kg,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_47,w_gpt-3.5-turbo-0125,0,1,gpt,fusion,Write the saddest story you can make from the perspective of an animal .
+t_48,w_gpt-3.5-turbo-0125,0,1,gpt,fusion,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_49,w_gpt-3.5-turbo-0125,0,1,plan_write,s2s,Write the saddest story you can make from the perspective of an animal .
+t_50,w_gpt-3.5-turbo-0125,1,1,plan_write,s2s,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_51,w_gpt-3.5-turbo-0125,1,1,plan_write,gpt_kg,Write the saddest story you can make from the perspective of an animal .
+t_52,w_gpt-3.5-turbo-0125,1,1,plan_write,gpt_kg,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_53,w_gpt-3.5-turbo-0125,0,1,plan_write,fusion,Write the saddest story you can make from the perspective of an animal .
+t_54,w_gpt-3.5-turbo-0125,1,1,plan_write,fusion,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_55,w_gpt-3.5-turbo-0125,1,1,s2s,gpt_kg,Write the saddest story you can make from the perspective of an animal .
+t_56,w_gpt-3.5-turbo-0125,1,1,s2s,gpt_kg,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_57,w_gpt-3.5-turbo-0125,1,1,s2s,fusion,Write the saddest story you can make from the perspective of an animal .
+t_58,w_gpt-3.5-turbo-0125,1,0,s2s,fusion,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
+t_59,w_gpt-3.5-turbo-0125,0,0,gpt_kg,fusion,Write the saddest story you can make from the perspective of an animal .
+t_60,w_gpt-3.5-turbo-0125,0,0,gpt_kg,fusion,"An ancient immortal soldier who has traveled the world learning from history 's greatest warriors and army 's since the beginning of civilization comes across the Vikings , and decides to join their society ."
