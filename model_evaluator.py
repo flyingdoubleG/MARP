@@ -439,14 +439,16 @@ class ModelEvaluator():
             #     failed = True
             if failed:
                 print(f"\nFailed at evaluating stories for premise {i+1}:\n\n{premise}")
+                directory = "data/"
+                
+                os.makedirs(directory, exist_ok=True)
+
+                with open(self.labels_path, 'wb') as file:
+                    pickle.dump(self.llm_labels, file)
+                print(f"\nSaved self.llm_labels to {self.labels_path}")
+
                 llmScore1 = [randint(1, 5) for _ in range(self.num_categories)]
                 llmScore2 = [randint(1, 5) for _ in range(self.num_categories)]
-                # directory = "data/"
-                # os.makedirs(directory, exist_ok=True)
-
-                # with open(self.labels_path, 'wb') as file:
-                #     pickle.dump(self.llm_labels, file)
-                # print(f"\nSaved self.llm_labels to {self.labels_path}")
 
                 # sys.exit(1)
             
