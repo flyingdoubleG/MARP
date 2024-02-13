@@ -172,3 +172,4 @@ playground.txt
 jsons/
 test.py
 draft.py
+data/*.pkl

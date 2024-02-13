@@ -1,8 +1,9 @@
 #!/bin/bash
 
-# Step 1: Delete data/llm_labels.pkl if it exists
-if [ -f "data/llm_labels.pkl" ]; then
-    rm "data/llm_labels.pkl"
+# Check if the data/ directory exists
+if [ -d "data/" ]; then
+    # Delete all .pkl files in the data/ directory
+    rm data/*.pkl
 fi
 
 # Step 2: Delete out.txt if it exists

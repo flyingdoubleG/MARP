@@ -9,8 +9,8 @@ import os
 import pickle
 import sys
 from tqdm import tqdm
-from random import randint
-# CASE_NUM = 30
+# from random import randint
+# CASE_NUM = 10
 
 from comparison_task import ComparisonTask
 
@@ -52,7 +52,7 @@ def extract_first_number(text):
 
 class ModelEvaluator():
     def __init__(self, model, dataset_name, filepath, num_prompts_eval=3, 
-                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only", temperature=None, top_p=None, special_mark="", initial_task_id=0):
+                 num_categories=1, bidir_eval=False, eval_rounds=1, verbose=False, query_mode="score only", temperature=None, top_p=None, special_mark="", initial_task_id=0, labels_path="llm_labels.pkl"):
         """
         num_prompts_eval: number of prompts to evaluate
         num_categories: number of scoring categories to evaluate
@@ -75,9 +75,10 @@ class ModelEvaluator():
         self.top_p = top_p
         self.special_mark = special_mark
         self.initial_task_id = initial_task_id
+        self.labels_path = os.path.join("data", labels_path)
 
-        if os.path.exists("data/llm_labels.pkl"):
-            with open("data/llm_labels.pkl", 'rb') as file:
+        if os.path.exists(self.labels_path):
+            with open(self.labels_path, 'rb') as file:
                 self.llm_labels = pickle.load(file)
             print("Loaded self.llm_labels from local successfully.\n")
         else:
@@ -440,12 +441,11 @@ class ModelEvaluator():
                 print(f"\nFailed at evaluating stories for premise {i+1}:\n\n{premise}")
 
                 directory = "data/"
-                path = "data/llm_labels.pkl"
                 os.makedirs(directory, exist_ok=True)
 
-                with open(path, 'wb') as file:
+                with open(self.labels_path, 'wb') as file:
                     pickle.dump(self.llm_labels, file)
-                print(f"\nSaved self.llm_labels to {path}")
+                print(f"\nSaved self.llm_labels to {self.labels_path}")
 
                 sys.exit(1)
             else:
@@ -598,7 +598,12 @@ class ModelEvaluator():
                 acc += tmp_acc
                 acc_count += 1
                 print(f"Train Accuracy for {writer1} vs {writer2}: {tmp_acc}; cumulative accuracy: {acc / acc_count}")
-                
+
+        # Now all pair-wise comparisons have been made
+        self.labels_path = os.path.join("data", "full_" + self.labels_path.split("/")[-1])
+        with open(self.labels_path, 'wb') as file:
+            pickle.dump(self.llm_labels, file)
+        print(f"\nSaved self.llm_labels to {self.labels_path}")    
         
         acc /= (len(writers) * (len(writers) - 1) / 2)
         print(f"\nOverall Train Accuracy: {acc}")

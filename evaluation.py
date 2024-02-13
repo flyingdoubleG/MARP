@@ -1,6 +1,7 @@
 import litellm
 from pathlib import Path
 from tqdm import tqdm
+import os
 
 from standard_prompts import *
 from model_evaluator import ModelEvaluator
@@ -81,10 +82,16 @@ if __name__ == '__main__':
     urls = ['llm-aes/gemini_meva_full_score_only', 'llm-aes/gemini_meva_full_rate_explain', 'llm-aes/gemini_meva_full_analyze_rate']
 
     for query_mode, url in zip(query_modes, urls):
+        labels_path = "full_" + query_mode + "_llm_labels.pkl"
+        labels_path = os.path.join("data", labels_path)
+        if os.path.exists(labels_path):
+            continue
+        
         print("=====================================================")
         print(f"meva, query mode: {query_mode}")
         print("=====================================================")
-        evaluator = ModelEvaluator('gemini-pro', 'meva', 'meva/mans_wp.json', num_prompts_eval=1, num_categories=1, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=6000)
+        labels_path = query_mode + "_llm_labels.pkl"
+        evaluator = ModelEvaluator('gemini-pro', 'meva', 'meva/mans_wp.json', num_prompts_eval=1, num_categories=1, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=6000, labels_path=labels_path)
 
         df = evaluator.collect_data(hub_url=url)
         df.to_csv(f'df/gemini_meva_full_{query_mode}.csv', index=False)
