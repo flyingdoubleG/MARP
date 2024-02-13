@@ -50,18 +50,17 @@ if __name__ == '__main__':
 
     PROMPT_TEMPLATE_2 = "Based on the following six attributes:\n1. Relevance (how well the story matches its prompt).\n2. Coherence (how much the story makes sense).\n3. Empathy (how well the reader can understand the character’s emotions).\n4. Surprise (how surprising the end of the story is).\n5. Engagement (how much the reader can engage with the story).\n6. Complexity (how elaborate the story is).\nEvaluate the following two stories by assigning an integer score (from 1 to 5) to each attribute. Higher score means better.\n\nThe initial prompt of story is: {}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format: \n###Story1 Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Story2 Ratings###\n*Relevance*: \n*Coherence*: \n*Empathy*: \n*Surprise*: \n*Engagement*: \n*Complexity*: \n\n###Explanations###:"
 
-    PROMPT_TEMPLATE_3 = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format:\n###Story1 Ratings###\n*Overall Quality w.r.t. Prompt*: \n\n###Story2 Ratings###\n*Overall Quality w.r.t. Prompt: \n"
+    PROMPT_TEMPLATE_3 = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format strictly:\n###Story1 Ratings###\n**Overall Quality w.r.t. Prompt**: \n\n###Story2 Ratings###\n**Overall Quality w.r.t. Prompt**: \n"
 
     PROMPT_TEMPLATE_4 = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format:\n###Story1 Ratings###\n*Overall Quality w.r.t. Prompt*: \n\n###Story2 Ratings###\n*Overall Quality w.r.t. Prompt*: \n\n###Explanations###:"
 
     PROMPT_TEMPLATE_5 = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by first providing an analysis, and then assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format:\n###Analysis###:\n\n###Story1 Ratings###\n*Overall Quality w.r.t. Prompt*: \n\n###Story2 Ratings###\n*Overall Quality w.r.t. Prompt*: \n"
 
-
-    prompt = PROMPT_TEMPLATE_5.format(premise, human_story, gpt2_story)
+    prompt = PROMPT_TEMPLATE_3.format(premise, human_story, gpt2_story)
     # prompt = PROMPT_TEMPLATE_2.format(premise, gpt2_story, gpt2_tag_story)
     print(prompt)
     print("=====================================================")
-    response = get_response('gpt-3.5-turbo-0125', prompt)
+    response = get_response('gemini-pro', prompt)
     # response = get_response('gpt-4-0125-preview', prompt)
     # response = get_response('gemini-pro', prompt)
     print(response)

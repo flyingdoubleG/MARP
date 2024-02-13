@@ -17,7 +17,7 @@ litellm.vertex_project = "multi-agent-411823"
 litellm.vertex_location = "us-central1"
 # litellm.set_verbose=True
 
-# from gemini import gemini_response, gemini_chat
+# from gemini import gemini_gen
 
 # Helper function
 def get_response(model, message, temperature=None, top_p=None):

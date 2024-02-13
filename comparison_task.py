@@ -7,7 +7,7 @@ from collections import Counter
 class ComparisonTask():
     current_task_id = 0
 
-    def __init__(self, model_name: str, human_eval: int, llm_eval: int, writer1: str, writer2: str, prompt: str):
+    def __init__(self, model_name: str, human_eval: int | str, llm_eval: int | str, writer1: str, writer2: str, prompt: str):
         ComparisonTask.current_task_id += 1
         self.task_id = f"t_{ComparisonTask.current_task_id}"
         self.worker_id = f"w_{model_name}"
@@ -124,4 +124,5 @@ if __name__ == "__main__":
     
     df = pd.DataFrame(data)
     dataset = Dataset.from_pandas(df)
-    dataset.push_to_hub(repo_id='llm-aes/pandalm-annotated-full', token=hf_write_token)
+    # dataset.push_to_hub(repo_id='llm-aes/pandalm-annotated-full', token=hf_write_token)
+    dataset.push_to_hub(repo_id='llm-aes/some_dataset', token=hf_write_token)

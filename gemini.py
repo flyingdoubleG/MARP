@@ -4,6 +4,17 @@ from vertexai.preview.generative_models import HarmCategory
 
 from vertexai.preview.generative_models import HarmBlockThreshold
 
+import os
+import google.generativeai as genai
+
+def gemini_gen(message: str) -> str:
+    config = genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
+
+    model = genai.GenerativeModel('gemini-pro')
+    response = model.generate_content(message)
+
+    return response.text
+
 def gemini_chat(message: str) -> str:
     # Initialize Vertex AI
     vertexai.init(project="multi-agent-411823", location="us-central1")

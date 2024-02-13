@@ -1,15 +1,18 @@
 import csv
 import json
+import pickle
+import os
 
 
 class DatasetLoader:
     """
     Loads a story/essay evaluation dataset, presented as a csv file. The first line of the CSV file are the column names. Then each subsequent line is a row of data.
     """
-    def __init__(self, dataset_name, filepath, writers):
+    def __init__(self, dataset_name, filepath, writers, load_from_pickle=True):
         self.filepath = filepath
         self.dataset_name = dataset_name
         self.writers = writers
+        self.load_from_pickle = load_from_pickle
         if dataset_name == "hanna":
             self.num_prompts = 96
             self.num_human_evaluators = 3
@@ -47,6 +50,15 @@ class DatasetLoader:
         Load the dataset. The first line of the CSV file are the column names.
         Then each subsequent line is a row of data.
         """
+        pickle_path = "data/hanna_data.pkl"
+        if self.load_from_pickle and os.path.exists(pickle_path):
+            with open(pickle_path, 'rb') as f:
+                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
+
+            print("hanna data loaded from local successfully.\n")
+
+            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
         column_names, data = DatasetLoader.load_csv(self.filepath)
         writers = self.writers
 
@@ -94,9 +106,24 @@ class DatasetLoader:
         
         assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
+        directory = "data/"
+        os.makedirs(directory, exist_ok=True)
+        with open('data/hanna_data.pkl', 'wb') as f:
+            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
+        print("hanna data saved to local successfully.\n")
+
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
     
     def process_data_meva(self):
+        pickle_path = "data/meva_data.pkl"
+        if self.load_from_pickle and os.path.exists(pickle_path):
+            with open(pickle_path, 'rb') as f:
+                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
+
+            print("meva data loaded from local successfully.\n")
+
+            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
         writers = self.writers
         assert len(writers) == 5
 
@@ -146,6 +173,12 @@ class DatasetLoader:
         
         assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
+        directory = "data/"
+        os.makedirs(directory, exist_ok=True)
+        with open('data/meva_data.pkl', 'wb') as f:
+            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
+        print("meva data saved to local successfully.\n")
+
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
     
     @staticmethod
@@ -185,4 +218,5 @@ if __name__ == "__main__":
     writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
     path = "meva/mans_wp.json"
     loader = DatasetLoader("meva", path, writers)
-    loader.process_data()
+    prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
+    print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
