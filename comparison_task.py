@@ -5,9 +5,13 @@ import os
 from collections import Counter
 
 class ComparisonTask():
-    current_task_id = 0
+    task_id_initialized = False
 
-    def __init__(self, model_name: str, human_eval: int | str, llm_eval: int | str, writer1: str, writer2: str, prompt: str):
+    def __init__(self, model_name: str, human_eval: int | str, llm_eval: int | str, writer1: str, writer2: str, prompt: str, initial_task_id: int = 0):
+        if not ComparisonTask.task_id_initialized:
+            ComparisonTask.current_task_id = initial_task_id
+            ComparisonTask.task_id_initialized = True
+
         ComparisonTask.current_task_id += 1
         self.task_id = f"t_{ComparisonTask.current_task_id}"
         self.worker_id = f"w_{model_name}"

@@ -2,6 +2,8 @@ import csv
 import json
 import pickle
 import os
+import pandas as pd
+from datasets import Dataset
 
 
 class DatasetLoader:
@@ -180,6 +182,7 @@ class DatasetLoader:
         print("meva data saved to local successfully.\n")
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        
     
     @staticmethod
     def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
@@ -214,9 +217,50 @@ class DatasetLoader:
 
         return [trainPrompt2Idx, trainIdx2Prompt, trainPrompt2Scores, trainPrompt2Stories], [testPrompt2Idx, testIdx2Prompt, testPrompt2Scores, testPrompt2Stories]
     
+class StoryAnnotation:
+    def __init__(self, premise, generator, story, human_score):
+        self.premise = premise
+        self.generator = generator
+        self.story = story
+        self.human_score = human_score
+
+
+def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writers, num_annotators, hub_url):
+
+    story_annotations = []
+    for prompt in prompt2Idx:
+        for writer in writers:
+            story = prompt2Stories[prompt][writer]
+            score = prompt2Scores[prompt][writer] / num_annotators
+            story_annotation = StoryAnnotation(prompt, writer, story, score)
+            story_annotations.append(story_annotation)
+    
+    data = [{
+        'premise': story_annotation.premise,
+        'generator': story_annotation.generator,
+        'story': story_annotation.story,
+        'human_score': story_annotation.human_score
+    } for story_annotation in story_annotations]
+
+    df = pd.DataFrame(data)
+
+    try:
+        if hub_url is not None:
+            hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
+            dataset = Dataset.from_pandas(df)
+            dataset.push_to_hub(repo_id=hub_url, token=hf_write_token)
+    except Exception as e:
+        print(f"Error pushing to hub: {e}")
+    
+    return df
+
 if __name__ == "__main__":
     writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
     path = "meva/mans_wp.json"
     loader = DatasetLoader("meva", path, writers)
     prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
     print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
+
+    # df = push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writers, 5, "llm-aes/meva_original")
+
+    # print(df)

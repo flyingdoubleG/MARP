@@ -4,3 +4,4 @@ litellm~=1.16.16
 # For gemini pro:
 google-cloud-aiplatform
 datasets
+tqdm
