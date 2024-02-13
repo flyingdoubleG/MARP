@@ -9,7 +9,7 @@ import os
 import pickle
 import sys
 from tqdm import tqdm
-# from random import randint
+from random import randint
 # CASE_NUM = 10
 
 from comparison_task import ComparisonTask
@@ -439,19 +439,20 @@ class ModelEvaluator():
             #     failed = True
             if failed:
                 print(f"\nFailed at evaluating stories for premise {i+1}:\n\n{premise}")
+                llmScore1 = [randint(1, 5) for _ in range(self.num_categories)]
+                llmScore2 = [randint(1, 5) for _ in range(self.num_categories)]
+                # directory = "data/"
+                # os.makedirs(directory, exist_ok=True)
 
-                directory = "data/"
-                os.makedirs(directory, exist_ok=True)
+                # with open(self.labels_path, 'wb') as file:
+                #     pickle.dump(self.llm_labels, file)
+                # print(f"\nSaved self.llm_labels to {self.labels_path}")
 
-                with open(self.labels_path, 'wb') as file:
-                    pickle.dump(self.llm_labels, file)
-                print(f"\nSaved self.llm_labels to {self.labels_path}")
-
-                sys.exit(1)
-            else:
-                llmScores1.append(llmScore1)
-                llmScores2.append(llmScore2)
-                self.llm_labels[premise][writer1][writer2] = (llmScore1, llmScore2)
+                # sys.exit(1)
+            
+            llmScores1.append(llmScore1)
+            llmScores2.append(llmScore2)
+            self.llm_labels[premise][writer1][writer2] = (llmScore1, llmScore2)
 
         llmScores1 = np.array(llmScores1).sum(axis=1)
         llmScores2 = np.array(llmScores2).sum(axis=1)

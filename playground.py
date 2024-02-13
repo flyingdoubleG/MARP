@@ -1,5 +1,6 @@
 import litellm
 import re
+from dataset_loader import *
 
 from standard_prompts import *
 
@@ -56,14 +57,34 @@ if __name__ == '__main__':
 
     PROMPT_TEMPLATE_5 = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by first providing an analysis, and then assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format:\n###Analysis###:\n\n###Story1 Ratings###\n*Overall Quality w.r.t. Prompt*: \n\n###Story2 Ratings###\n*Overall Quality w.r.t. Prompt*: \n"
 
-    prompt = PROMPT_TEMPLATE_3.format(premise, human_story, gpt2_story)
+    # prompt = PROMPT_TEMPLATE_3.format(premise, human_story, gpt2_story)
     # prompt = PROMPT_TEMPLATE_2.format(premise, gpt2_story, gpt2_tag_story)
-    print(prompt)
-    print("=====================================================")
-    response = get_response('gemini-pro', prompt)
+    # print(prompt)
+    # print("=====================================================")
+    # response = get_response('gemini-pro', prompt)
     # response = get_response('gpt-4-0125-preview', prompt)
     # response = get_response('gemini-pro', prompt)
-    print(response)
+    # print(response)
 
     # s = "*Relevance*: "
     # print(extract_first_number(s))
+
+    temp = "The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru . The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru . The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru. The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru ."
+
+    writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+    path = "meva/mans_wp.json"
+    loader = DatasetLoader("meva", path, writers)
+    prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
+    print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
+
+    premise = idx2Prompt[95]
+    story1 = prompt2Stories[premise]['plan_write']
+    story2 = prompt2Stories[premise]['gpt']
+
+    print("Premise:\n\n", premise)
+    print("\n\nStory1:\n\n", story1)
+    print("\n\nStory2:\n\n", story2)
+
+    prompt = PROMPT_TEMPLATE_3.format(premise, story2, story1)
+    response = get_response('gemini-pro', prompt)
+    print(response)
