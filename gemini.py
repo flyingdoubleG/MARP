@@ -53,6 +53,28 @@ def gemini_response(message: str) -> str:
 
 
 if __name__ == "__main__":
-    response = gemini_chat("Please tell me a joke.")
-    # response = gemini_response("Please tell me a joke.")
-    print(response)
+    # response = gemini_chat("Please tell me a joke.")
+    # # response = gemini_response("Please tell me a joke.")
+    # print(response)
+
+
+    # Load your API key from the environment variable
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY not found in environment variables. Please export it in your .bash_profile")
+
+    # Configure the API client
+    genai.configure(api_key=api_key)
+
+    # Define your prompt for Gemini Pro
+    prompt = "Write a poem about the beauty of artificial intelligence."
+
+    # Generate a response using a suitable Gemini Pro model
+    response = genai.generate(
+        model="ultra.1.0", 
+        input=prompt,
+        temperature=0.7  # Adjust for creativity 
+    )
+
+    # Print the generated poem
+    print(response.generations[0].text) 
