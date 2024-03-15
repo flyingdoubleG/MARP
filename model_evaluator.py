@@ -115,6 +115,16 @@ class ModelEvaluator():
             # self.analyze_rate_single_essay_prompt_template = MEVA_ANALYZE_RATE_SINGLE_ESSAY_PROMPT_TEMPLATE
 
             # self.rate_explain_single_essay_prompt_template = MEVA_RATE_EXPLAIN_SINGLE_ESSAY_PROMPT_TEMPLATE
+            
+        elif dataset_name == "SummEval":
+            self.evaluate_prefix = self.evaluate_prefix_SummEval
+            self.num_all_prompts = 100
+
+            self.rate_double_essay_prompt_template = SUMMEVAL_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.analyze_rate_double_essay_prompt_template = SUMMEVAL_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE
+            
+            self.rate_explain_double_essay_prompt_template = SUMMEVAL_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -509,6 +519,7 @@ class ModelEvaluator():
             llmScore = sum(llmScore)
             return llmScore
         
+    # Create a dictionary to store the LLM labels
     def load_llm_labels(self, writers, prompt2Idx):
         if self.llm_labels is None:
             self.llm_labels = {prompt: {writer1: {} for writer1 in writers} for prompt in list(prompt2Idx.keys())[:self.num_prompts_eval]}
@@ -549,6 +560,22 @@ class ModelEvaluator():
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
         writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+
+        self.load_llm_labels(writers, prompt2Idx)
+
+        return writers, train_set, test_set
+    
+    def evaluate_prefix_SummEval(self):
+        NUM_TRAIN = self.num_all_prompts
+        assert self.num_prompts_eval <= NUM_TRAIN
+
+        writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+
+        loader = DatasetLoader(self.dataset_name, self.filepath, writers)
+
+        prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
+
+        train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
 
         self.load_llm_labels(writers, prompt2Idx)
 

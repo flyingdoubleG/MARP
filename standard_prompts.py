@@ -2,6 +2,12 @@ GENERATE_ESSAY_PROMPT_TEMPLATE = "Based on premise: \"{}\" generate story contai
 
 RATE_ESSAY_PROMPT_TEMPLATE="Based on 1. Interesting. Interesting to the reader. 2. Coherent. Plot-coherent. 3. Relevant. Faithful to the initial premise. 4. Humanlike. Judged to be human-written.4 dimensions evaluate following 2 stories, the score is from 0 to 100, higher score means better.\nThe initial premise of story is \"{}\"\nStory 1: {}\n Story 2: {}."
 
+SUMMEVAL_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE = ""
+
+SUMMEVAL_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE = ""
+
+SUMMEVAL_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE = ""
+
 
 MEVA_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE = "Evaluate the overall quality of the following two stories with respect to the given story prompt, by assigning an integer score (from 1 to 5) to each story. Higher score means better.\n\nThe initial prompt of story is:\n{}\n\nStory1:\n{}\n\nStory2:\n{}\n\nIn your response, please use the following format strictly:\n###Story1 Ratings###\n**Overall Quality w.r.t. Prompt**: \n\n###Story2 Ratings###\n**Overall Quality w.r.t. Prompt**: \n"
 

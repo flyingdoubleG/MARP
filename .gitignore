@@ -173,3 +173,6 @@ jsons/
 test.py
 draft.py
 data/*.pkl
+cnndm/
+
+model_annotations.aligned.jsonl

@@ -25,6 +25,11 @@ class DatasetLoader:
             self.num_human_evaluators = 5
             self.num_categories = 1
             self.process_data = self.process_data_meva
+        elif dataset_name == "SummEval":
+            self.num_prompts = 100
+            self.num_human_evaluators = 3
+            self.num_categories = 4
+            self.process_data = self.process_data_SummEval
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -182,7 +187,99 @@ class DatasetLoader:
         print("meva data saved to local successfully.\n")
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+    
+    def process_data_SummEval(self):
+        pickle_path = "data/SummEval_data.pkl"
+        if self.load_from_pickle and os.path.exists(pickle_path):
+            with open(pickle_path, 'rb') as f:
+                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
+
+            print("SummEval data loaded from local successfully.\n")
+
+            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
+        writers = self.writers
+        writer_map = {"M0": "LEAD-3", "M1": "NEUSUM", "M2": "BanditSum", "M5": "RNES",
+                      "M8": "Point Generator", "M9": "Fast-abs-rl", "M10": "Bottom-Up",
+                      "M11": "Improve-abs", "M12": "Unified-ext-abs", "M13": "ROUGESal", "M14": "Multi-task", "M15": "Closed book decoder", "M17": "T5",
+                      "M20": "GPT-2", "M22": "BART", "M23": "Pegasus"}
+        assert len(writers) == 16
+
+        idx2Prompt = {}
+        prompt2Idx = {}
+        prompt2Scores = {}
+        prompt2Stories = {}
+
+        # Helper dictionary to ensure each writer only writes for a prompt once.
+        prompt2AddCount = {}
+        prompt2Stories = {}
+
+        article_ids = set()
+
+        with open(self.filepath, 'r') as file:
+            # idx records the largest prompt index so far
+            idx = 0
+            for line in file:
+                entry = json.loads(line)
+                
+                article_id = entry["id"].strip()
+                article_ids.add(article_id)
+
+                prompt = entry["text"].strip()
+                writer_story = entry["decoded"].strip()
+
+                expert_annotations = entry["expert_annotations"]
+
+                # Records the total scores for the current summary
+                total_scores = {'coherence': 0, 'consistency': 0, 'fluency': 0, 'relevance': 0}
+
+                num_experts = 0
+                for annotation in expert_annotations:
+                    num_experts += 1
+                    total_scores['coherence'] += annotation['coherence']
+                    total_scores['consistency'] += annotation['consistency']
+                    total_scores['fluency'] += annotation['fluency']
+                    total_scores['relevance'] += annotation['relevance']
+
+                assert num_experts == 3
+                writer_score = sum(total_scores.values())
+
+                if prompt not in prompt2Idx:
+                    prompt2Idx[prompt] = idx
+                    idx2Prompt[idx] = prompt
+                    idx += 1
+                    prompt2Scores[prompt] = {}
+                    prompt2AddCount[prompt] = {}
+                    prompt2Stories[prompt] = {}
+                    for writer in writers:
+                        prompt2Scores[prompt][writer] = 0
+                        prompt2AddCount[prompt][writer] = 0
+                elif article_id not in article_ids:
+                    raise ValueError(f"Article id: {article_id} exists in the dataset but article: {prompt} does not exist in the dataset. The model id: {entry['model_id']}.")
+                
+                # Make sure curr_writer is not the same as the "writer" in the
+                # previous for loop.
+                curr_writer = writer_map[entry["model_id"].strip()]
+                    
+                prompt2Scores[prompt][curr_writer] += writer_score
+                prompt2AddCount[prompt][curr_writer] += 1
+                prompt2Stories[prompt][curr_writer] = writer_story
         
+        assert idx == self.num_prompts == 100
+        for value in prompt2AddCount.values():
+            for writer in writers:
+                assert value[writer] == 1
+        
+        assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
+
+        directory = "data/"
+        os.makedirs(directory, exist_ok=True)
+        with open('data/SummEval_data.pkl', 'wb') as f:
+            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
+        print("SummEval data saved to local successfully.\n")
+
+        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
     
     @staticmethod
     def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
@@ -236,9 +333,9 @@ def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writ
             story_annotations.append(story_annotation)
     
     data = [{
-        'premise': story_annotation.premise,
+        'input': story_annotation.premise,
         'generator': story_annotation.generator,
-        'story': story_annotation.story,
+        'output': story_annotation.story,
         'human_score': story_annotation.human_score
     } for story_annotation in story_annotations]
 
@@ -255,12 +352,13 @@ def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writ
     return df
 
 if __name__ == "__main__":
-    writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
-    path = "meva/mans_wp.json"
-    loader = DatasetLoader("meva", path, writers)
+    writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+
+    path = "model_annotations.aligned.paired.jsonl"
+    loader = DatasetLoader("SummEval", path, writers)
     prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
     print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
 
-    # df = push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writers, 5, "llm-aes/meva_original")
+    # df = push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writers, 3, "llm-aes/SummEval_original")
 
     # print(df)
