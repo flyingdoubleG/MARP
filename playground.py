@@ -71,20 +71,29 @@ if __name__ == '__main__':
 
     temp = "The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru . The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru . The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru. The old walked into the next store , nearly with flowers , broken . The old man was alone . The old lady watched her door. The elderly guy , Mr . Gaw Reynolds , had seen her there a day before , but he didn ’ t want to listen to her say anything else . He wanted to go sit in the other room to watch his old lady . He wanted to go to the drive-thru ."
 
-    writers = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
-    path = "meva/mans_wp.json"
-    loader = DatasetLoader("meva", path, writers)
+    writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+
+    path = "SummEval/model_annotations.aligned.paired.jsonl"
+    loader = DatasetLoader("SummEval", path, writers)
     prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
     print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
 
-    premise = idx2Prompt[95]
-    story1 = prompt2Stories[premise]['plan_write']
-    story2 = prompt2Stories[premise]['gpt']
+    input = idx2Prompt[0]
+    output1 = prompt2Stories[input]['T5']
+    output2 = prompt2Stories[input]['BART']
 
-    print("Premise:\n\n", premise)
-    print("\n\nStory1:\n\n", story1)
-    print("\n\nStory2:\n\n", story2)
+    print("\nInput:\n")
+    print(input)
+    print("\nOutput1:\n")
+    print(output1)
+    print("\nOutput2:\n")
+    print(output2)
 
-    prompt = PROMPT_TEMPLATE_3.format(premise, story2, story1)
+    # prompt = SUMMEVAL_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output2, output1)
+    # prompt = SUMMEVAL_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output1, output2)
+    prompt = SUMMEVAL_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output1, output2)
+    print("=====================================================")
+    print(prompt)
+    print("=====================================================")
     response = get_response('gemini-pro', prompt)
     print(response)

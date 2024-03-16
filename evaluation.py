@@ -61,7 +61,7 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 
 if __name__ == '__main__':
-    print("hanna, gemini-pro, 96 prompts, 3 modes, double scoring\n")
+    print("SummEval, gemini-pro, 100 sources, 3 modes, double scoring\n")
 
     # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="score only", initial_task_id=30000)
 
@@ -79,31 +79,34 @@ if __name__ == '__main__':
     # df = evaluator.collect_data(hub_url="llm-aes/toy")
     # print(df)
 
-    query_modes = ["score only", "rate explain", "analyze rate"]
+    query_modes = ["score only", "rate explain", "analyze rate"][0:1]
 
     # urls = ['llm-aes/gemini_meva_full_score_only', 'llm-aes/gemini_meva_full_rate_explain', 'llm-aes/gemini_meva_full_analyze_rate']
 
-    urls = ['llm-aes/gemini_hanna_full_score_only', 'llm-aes/gemini_hana_full_rate_explain', 'llm-aes/gemini_hana_full_analyze_rate']
+    urls = ['llm-aes/gemini_SummEval_full_score_only', 'llm-aes/gemini_SummEval_full_rate_explain', 'llm-aes/gemini_SummEval_full_analyze_rate'][0:1]
+
+    # urls = ['llm-aes/toy']
 
     try:
         for query_mode, url in zip(query_modes, urls):
-            labels_path = "full_" + query_mode + "_llm_labels.pkl"
+            labels_path = "full_SummEval_" + query_mode + "_llm_labels.pkl"
             labels_path = os.path.join("data", labels_path)
             
             if os.path.exists(labels_path):
                 continue
 
             print("=====================================================")
-            print(f"hanna, query mode: {query_mode}")
+            print(f"SummEval, query mode: {query_mode}")
             print("=====================================================")
-            labels_path = query_mode + "_llm_labels.pkl"
+            # Note that labels_path will be automatically joined with "data" once 
+            # the model evaluator is initialized.
+            labels_path = "SummEval_" + query_mode + "_llm_labels.pkl"
 
-            # evaluator = ModelEvaluator('gemini-pro', 'meva', 'meva/mans_wp.json', num_prompts_eval=200, num_categories=1, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=6000, labels_path=labels_path)
-
-            evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=96, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=30000, labels_path=labels_path)
+            evaluator = ModelEvaluator('gemini-pro', 'SummEval', 'SummEval/model_annotations.aligned.paired.jsonl', num_prompts_eval=2, num_categories=4, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=0, labels_path=labels_path)
 
             df = evaluator.collect_data(hub_url=url)
-            df.to_csv(f'df/gemini_hanna_full_{query_mode}.csv', index=False)
+            # df = evaluator.collect_data(hub_url=None)
+            df.to_csv(f'df/gemini_SummEval_full_{query_mode}.csv', index=False)
             print(df)
             print("\n")
     except:

@@ -76,6 +76,7 @@ class ModelEvaluator():
         self.special_mark = special_mark
         self.initial_task_id = initial_task_id
         self.labels_path = os.path.join("data", labels_path)
+        self.prev_save_time = time.time()
 
         if os.path.exists(self.labels_path):
             with open(self.labels_path, 'rb') as file:
@@ -170,7 +171,7 @@ class ModelEvaluator():
     
     def parse_double_scores_advanced(self, response):
         """
-        Parse scores for two stories evaluated together.
+        Parse scores for two outputs evaluated together.
         """
         try:
             # Splitting the response by newlines
@@ -183,17 +184,43 @@ class ModelEvaluator():
             reached_ratings2 = False
             reached_explanations = False
 
-            if self.query_mode  == "rate explain":
+            if self.query_mode == "score only":
+                for line in lines:
+                    # Identify what is the nature of the current line
+                    if not reached_ratings1:
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*1\s*Ratings\s*##', line)):  
+                            reached_ratings1 = True
+                            continue
+                        else:
+                            continue # We use continue here to emphasize the logic. The first Ratings section has not been reached yet, so we can directly proceed to the next line.
+                    elif not reached_ratings2:
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*2\s*Ratings\s*##', line)):
+                            reached_ratings2 = True
+                            # If the current line is the start of the second Ratings section, continue to the next line after recognizing it
+                            continue
+                        # Even if the current line is not the start of the second Ratings section, we can still proceed for further processing.
+                    
+                    assert reached_ratings1
+                    if bool(re.search(r'\*[^*]+\*', line)):
+                        score = extract_first_number(line)
+                        if score is None:
+                            continue
+                        if reached_ratings2:
+                            llm_attr_scores2.append(score)
+                        elif reached_ratings1:
+                            llm_attr_scores1.append(score)
+
+            elif self.query_mode  == "rate explain":
                 for line in lines:
                     # This trio-if block is used to identify what is the nature of the current line
                     if not reached_ratings1:
-                        if bool(re.search(r'##\s*Story\s*1\s*Ratings\s*##', line)):
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*1\s*Ratings\s*##', line)):  
                             reached_ratings1 = True
                             continue
                         else:
                             continue # We use continue here to emphasize the logic. The Story1 Ratings section has not been reached yet, so we can directly proceed to the next line.
                     elif not reached_ratings2:
-                        if bool(re.search(r'##\s*Story\s*2\s*Ratings\s*##', line)):
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*2\s*Ratings\s*##', line)):
                             reached_ratings2 = True
                             # If the current line is the start of the Story2 Ratings section, continue to the next line after recognizing it
                             continue
@@ -212,17 +239,18 @@ class ModelEvaluator():
                             llm_attr_scores2.append(score)
                         elif reached_ratings1:
                             llm_attr_scores1.append(score)
+
             elif self.query_mode == "analyze rate":
                 for line in lines:
                     # This trio-if block is used to identify what is the nature of the current line
                     if not reached_ratings1:
-                        if bool(re.search(r'##\s*Story\s*1\s*Ratings\s*##', line)):
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*1\s*Ratings\s*##', line)):
                             reached_ratings1 = True
                             continue
                         else:
                             continue # We use continue here to emphasize the logic. The Story1 Ratings section has not been reached yet, so we can directly proceed to the next line.
                     elif not reached_ratings2:
-                        if bool(re.search(r'##\s*Story\s*2\s*Ratings\s*##', line)):
+                        if bool(re.search(r'##\s*[a-zA-Z]+\s*2\s*Ratings\s*##', line)):
                             reached_ratings2 = True
                             # If the current line is the start of the Story2 Ratings section, continue to the next line after recognizing it
                             continue
@@ -429,12 +457,7 @@ class ModelEvaluator():
 
                 # Try parsing the LLM response
                 try:
-                    if self.query_mode == "score only":
-                        llmScore1, llmScore2 = self.parse_scores(response, double_story=True, keyword="Story")
-                    elif self.query_mode == "analyze rate":
-                        llmScore1, llmScore2 = self.parse_double_scores_advanced(response)
-                    elif self.query_mode == "rate explain":
-                        llmScore1, llmScore2 = self.parse_double_scores_advanced(response)
+                    llmScore1, llmScore2 = self.parse_double_scores_advanced(response)
 
                 except Exception as e:
                     print(f"Error parsing scores. Error message: {e}\nRetrying...\n")
@@ -449,9 +472,8 @@ class ModelEvaluator():
             #     failed = True
             if failed:
                 print(f"\nFailed at evaluating stories for premise {i+1}:\n\n{premise}")
-                directory = "data/"
                 
-                os.makedirs(directory, exist_ok=True)
+                os.makedirs("data/", exist_ok=True)
 
                 with open(self.labels_path, 'wb') as file:
                     pickle.dump(self.llm_labels, file)
@@ -465,6 +487,16 @@ class ModelEvaluator():
             llmScores1.append(llmScore1)
             llmScores2.append(llmScore2)
             self.llm_labels[premise][writer1][writer2] = (llmScore1, llmScore2)
+
+            # Save the labels every 20 minutes
+            if time.time() - self.prev_save_time >= 1200:
+                os.makedirs("data/", exist_ok=True)
+
+                with open(self.labels_path, 'wb') as file:
+                    pickle.dump(self.llm_labels, file)
+
+                print(f"\nRoutinely saved self.llm_labels to {self.labels_path}")
+                self.prev_save_time = time.time()
 
         llmScores1 = np.array(llmScores1).sum(axis=1)
         llmScores2 = np.array(llmScores2).sum(axis=1)
@@ -576,6 +608,8 @@ class ModelEvaluator():
         prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
 
         train_set, test_set = loader.splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, NUM_TRAIN)
+
+        writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
 
         self.load_llm_labels(writers, prompt2Idx)
 

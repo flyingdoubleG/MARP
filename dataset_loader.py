@@ -354,7 +354,7 @@ def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writ
 if __name__ == "__main__":
     writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
 
-    path = "model_annotations.aligned.paired.jsonl"
+    path = "SummEval/model_annotations.aligned.paired.jsonl"
     loader = DatasetLoader("SummEval", path, writers)
     prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
     print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
