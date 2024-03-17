@@ -174,5 +174,6 @@ test.py
 draft.py
 data/*.pkl
 cnndm/
+df/
 
 model_annotations.aligned.jsonl

@@ -107,6 +107,8 @@ if __name__ == '__main__':
 
             df = evaluator.collect_data(hub_url=url)
             # df = evaluator.collect_data(hub_url=None)
+            
+            os.makedirs("df/", exist_ok=True)
             df.to_csv(f'df/{model_short_name}_{dataset_name}_full_{query_mode}.csv', index=False)
             print(df)
             print("\n")
