@@ -1,6 +1,6 @@
-tenacity==8.2.2
-openai==0.28
-litellm~=1.16.16
+tenacity
+openai
+litellm
 # For gemini pro:
 google-cloud-aiplatform
 datasets

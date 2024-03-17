@@ -413,9 +413,7 @@ class ModelEvaluator():
         
         llmScores1, llmScores2 = [], []
         
-        counter = 1
-        for i in tqdm(range(len(stories1)), desc=f"{writer1} vs {writer2}, premise {counter}", leave=False):
-            counter += 1
+        for i in tqdm(range(len(stories1)), desc=f"{writer1} vs {writer2}", leave=False):
             premise = premises[i]
             story1 = stories1[i]
             story2 = stories2[i]

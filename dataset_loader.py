@@ -15,21 +15,25 @@ class DatasetLoader:
         self.dataset_name = dataset_name
         self.writers = writers
         self.load_from_pickle = load_from_pickle
+        self.save_dir_name = "dataset"
         if dataset_name == "hanna":
             self.num_prompts = 96
             self.num_human_evaluators = 3
             self.num_categories = 6
             self.process_data = self.process_data_hanna
+            self.pickle_path = os.path.join(self.save_dir_name, "hanna_data.pkl")
         elif dataset_name == "meva":
             self.num_prompts = 200
             self.num_human_evaluators = 5
             self.num_categories = 1
             self.process_data = self.process_data_meva
+            self.pickle_path = os.path.join(self.save_dir_name, "meva_data.pkl")
         elif dataset_name == "SummEval":
             self.num_prompts = 100
             self.num_human_evaluators = 3
             self.num_categories = 4
             self.process_data = self.process_data_SummEval
+            self.pickle_path = os.path.join(self.save_dir_name, "SummEval_data.pkl")
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -51,21 +55,35 @@ class DatasetLoader:
                 row_num += 1
 
         return column_names, data
+    
+    def process_data_prefix(self):
+        if self.load_from_pickle and os.path.exists(self.pickle_path):
+            with open(self.pickle_path, 'rb') as f:
+                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
+
+            print(f"{self.dataset_name} data loaded from local successfully.\n")
+
+            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        else:
+            return None
+
+    def process_data_suffix(self, prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories):
+        os.makedirs(self.save_dir_name, exist_ok=True)
+        with open(self.pickle_path, 'wb') as f:
+            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
+        print(f"{self.dataset_name} data saved to local successfully.\n")
+
+        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
 
     def process_data_hanna(self):
         """
         Load the dataset. The first line of the CSV file are the column names.
         Then each subsequent line is a row of data.
         """
-        pickle_path = "data/hanna_data.pkl"
-        if self.load_from_pickle and os.path.exists(pickle_path):
-            with open(pickle_path, 'rb') as f:
-                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
-
-            print("hanna data loaded from local successfully.\n")
-
-            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
-
+        prefix_result = self.process_data_prefix()
+        if prefix_result is not None:
+            return prefix_result
+        
         column_names, data = DatasetLoader.load_csv(self.filepath)
         writers = self.writers
 
@@ -113,23 +131,12 @@ class DatasetLoader:
         
         assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
-        directory = "data/"
-        os.makedirs(directory, exist_ok=True)
-        with open('data/hanna_data.pkl', 'wb') as f:
-            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
-        print("hanna data saved to local successfully.\n")
-
-        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        return self.process_data_suffix(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories)
     
     def process_data_meva(self):
-        pickle_path = "data/meva_data.pkl"
-        if self.load_from_pickle and os.path.exists(pickle_path):
-            with open(pickle_path, 'rb') as f:
-                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
-
-            print("meva data loaded from local successfully.\n")
-
-            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        prefix_result = self.process_data_prefix()
+        if prefix_result is not None:
+            return prefix_result
 
         writers = self.writers
         assert len(writers) == 5
@@ -180,23 +187,12 @@ class DatasetLoader:
         
         assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
-        directory = "data/"
-        os.makedirs(directory, exist_ok=True)
-        with open('data/meva_data.pkl', 'wb') as f:
-            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
-        print("meva data saved to local successfully.\n")
-
-        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        return self.process_data_suffix(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories)
     
     def process_data_SummEval(self):
-        pickle_path = "data/SummEval_data.pkl"
-        if self.load_from_pickle and os.path.exists(pickle_path):
-            with open(pickle_path, 'rb') as f:
-                prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = pickle.load(f)
-
-            print("SummEval data loaded from local successfully.\n")
-
-            return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+        prefix_result = self.process_data_prefix()
+        if prefix_result is not None:
+            return prefix_result
 
         writers = self.writers
         writer_map = {"M0": "LEAD-3", "M1": "NEUSUM", "M2": "BanditSum", "M5": "RNES",
@@ -241,7 +237,7 @@ class DatasetLoader:
                     total_scores['fluency'] += annotation['fluency']
                     total_scores['relevance'] += annotation['relevance']
 
-                assert num_experts == 3
+                assert num_experts == self.num_human_evaluators
                 writer_score = sum(total_scores.values())
 
                 if prompt not in prompt2Idx:
@@ -272,15 +268,8 @@ class DatasetLoader:
         
         assert len(prompt2Idx) == len(idx2Prompt) == len(prompt2Scores) == len(prompt2AddCount) == self.num_prompts
 
-        directory = "data/"
-        os.makedirs(directory, exist_ok=True)
-        with open('data/SummEval_data.pkl', 'wb') as f:
-            pickle.dump((prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories), f)
-        print("SummEval data saved to local successfully.\n")
+        return self.process_data_suffix(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories)
 
-        return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
-
-    
     @staticmethod
     def splitTrainTest(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, num_train):
         """

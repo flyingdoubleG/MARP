@@ -78,7 +78,7 @@ if __name__ == '__main__':
     prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
     print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
 
-    input = idx2Prompt[0]
+    input = idx2Prompt[95]
     output1 = prompt2Stories[input]['T5']
     output2 = prompt2Stories[input]['BART']
 
@@ -91,9 +91,9 @@ if __name__ == '__main__':
 
     # prompt = SUMMEVAL_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output2, output1)
     # prompt = SUMMEVAL_ANALYZE_RATE_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output1, output2)
-    prompt = SUMMEVAL_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output1, output2)
+    prompt = SUMMEVAL_RATE_EXPLAIN_DOUBLE_ESSAY_PROMPT_TEMPLATE.format(input, output2, output1)
     print("=====================================================")
     print(prompt)
     print("=====================================================")
-    response = get_response('gemini-pro', prompt)
+    response = get_response('claude-3-haiku-20240307', prompt)
     print(response)

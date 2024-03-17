@@ -61,7 +61,10 @@ def evaluate(essay_path, evaluator_model, premise, num_trials, baseline_path):
 
 
 if __name__ == '__main__':
-    print("SummEval, gemini-pro, 100 sources, 3 modes, double scoring\n")
+    model_short_name = "claude"
+    model_full_name = "claude-3-haiku-20240307"
+    dataset_name = "SummEval"
+    print(f"{dataset_name}, {model_full_name}, 100 sources, score only mode, double scoring\n")
 
     # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="score only", initial_task_id=30000)
 
@@ -81,15 +84,13 @@ if __name__ == '__main__':
 
     query_modes = ["score only", "rate explain", "analyze rate"][0:1]
 
-    # urls = ['llm-aes/gemini_meva_full_score_only', 'llm-aes/gemini_meva_full_rate_explain', 'llm-aes/gemini_meva_full_analyze_rate']
-
-    urls = ['llm-aes/gemini_SummEval_full_score_only', 'llm-aes/gemini_SummEval_full_rate_explain', 'llm-aes/gemini_SummEval_full_analyze_rate'][0:1]
+    urls = [f'llm-aes/{model_short_name}_{dataset_name}_full_score_only', f'llm-aes/{model_short_name}_{dataset_name}_full_rate_explain', f'llm-aes/{model_short_name}_{dataset_name}_full_analyze_rate'][0:1]
 
     # urls = ['llm-aes/toy']
 
     try:
         for query_mode, url in zip(query_modes, urls):
-            labels_path = "full_SummEval_" + query_mode + "_llm_labels.pkl"
+            labels_path = f"full_{dataset_name}_" + query_mode + "_llm_labels.pkl"
             labels_path = os.path.join("data", labels_path)
             
             if os.path.exists(labels_path):
@@ -100,13 +101,13 @@ if __name__ == '__main__':
             print("=====================================================")
             # Note that labels_path will be automatically joined with "data" once 
             # the model evaluator is initialized.
-            labels_path = "SummEval_" + query_mode + "_llm_labels.pkl"
+            labels_path = f"{dataset_name}_" + query_mode + "_llm_labels.pkl"
 
-            evaluator = ModelEvaluator('gemini-pro', 'SummEval', 'SummEval/model_annotations.aligned.paired.jsonl', num_prompts_eval=2, num_categories=4, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=0, labels_path=labels_path)
+            evaluator = ModelEvaluator(model_full_name, dataset_name, 'SummEval/model_annotations.aligned.paired.jsonl', num_prompts_eval=100, num_categories=4, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=0, labels_path=labels_path)
 
             df = evaluator.collect_data(hub_url=url)
             # df = evaluator.collect_data(hub_url=None)
-            df.to_csv(f'df/gemini_SummEval_full_{query_mode}.csv', index=False)
+            df.to_csv(f'df/{model_short_name}_{dataset_name}_full_{query_mode}.csv', index=False)
             print(df)
             print("\n")
     except:
