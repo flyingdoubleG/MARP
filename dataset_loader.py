@@ -4,6 +4,7 @@ import pickle
 import os
 import pandas as pd
 from datasets import Dataset
+from comparison_task import ComparisonTaskLLMBar
 
 
 class DatasetLoader:
@@ -34,6 +35,12 @@ class DatasetLoader:
             self.num_categories = 4
             self.process_data = self.process_data_SummEval
             self.pickle_path = os.path.join(self.save_dir_name, "SummEval_data.pkl")
+        elif dataset_name == "llmbar":
+            self.num_prompts = 419
+            self.num_human_evaluators = 1
+            self.num_categories = 1
+            self.process_data = self.process_data_llmbar
+            self.pickle_path = os.path.join(self.save_dir_name, "llmbar_data.pkl")
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -74,6 +81,123 @@ class DatasetLoader:
         print(f"{self.dataset_name} data saved to local successfully.\n")
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+    
+    def process_data_llmbar(self):
+        if self.load_from_pickle and os.path.exists(self.pickle_path):
+            with open(self.pickle_path, 'rb') as f:
+                data = pickle.load(f)
+            df = pd.DataFrame(data)
+            dataset = Dataset.from_pandas(df)
+            return data, df, dataset
+
+        sub_datasets = ["Natural", "Adversarial/Neighbor", "Adversarial/GPTInst", "Adversarial/GPTOut", "Adversarial/Manual"]
+        evaluators = ["GPT-4", "PaLM2"]
+        strategies = ["Vanilla_NoRules", "Vanilla", "CoT", "Swap", "Swap_CoT", "Metrics", "Reference", "Metrics_Reference"]
+        assert len(strategies) == 8
+
+        top_dir = "LLMBar"
+        sub_dataset_counter = {}
+        comparison_tasks = []
+        # num_null_cases = 0
+        # num_single_null_cases = 0
+        for sub_dataset in sub_datasets:
+            second_dir = os.path.join(top_dir, sub_dataset, "evaluators")
+            sub_dataset_counter[sub_dataset] = 0
+            for evaluator in evaluators:
+                third_dir = os.path.join(second_dir, evaluator)
+                for strategy in strategies:
+                    if strategy == "CoT" and evaluator == "PaLM2":
+                        continue
+                    filepath = os.path.join(third_dir, strategy, "result.json")
+                    if not os.path.exists(filepath):
+                        raise ValueError(f"File does not exist: {filepath}")
+                    
+                    num_null_cases = 0
+                    num_single_null_cases = 0
+                    with open(filepath, 'r') as file:
+                        entries = json.load(file)
+                        num_entries = len(entries)
+                        if sub_dataset_counter[sub_dataset] == 0:
+                            sub_dataset_counter[sub_dataset] = num_entries
+                        elif sub_dataset_counter[sub_dataset] != num_entries:
+                            raise ValueError(f"Number of entries in {filepath} is not equal to the number of entries in the other files.")
+                        num_agreements = 0
+                        for entry in entries:
+                            instruction = entry["input"]
+                            output_1 = entry["output_1"]
+                            output_2 = entry["output_2"]
+                            # The human label is 0 if the first output is correct, and 1 if the second output is correct.
+                            human_label = entry["label"] - 1
+                            result_1 = entry["results"][-1]["swap = False"]["winner"]
+                            result_2 = entry["results"][-1]["swap = True"]["winner"]
+
+                            if result_1 is None or result_2 is None:
+                                num_null_cases += 1
+                                if result_1 is None and result_2 is not None:
+                                    num_single_null_cases += 1
+                                    llm_label = int(result_2) - 1
+                                    swap_equal = False
+                                elif result_1 is not None and result_2 is None:
+                                    num_single_null_cases += 1
+                                    llm_label = int(result_1) - 1
+                                    swap_equal = False
+                                else:
+                                    llm_label = 0
+                                    swap_equal = False
+                            else:
+                                result_1 = int(result_1)
+                                result_2 = int(result_2)
+                                llm_label = result_1 - 1
+                                swap_equal = (result_1 == result_2)
+
+                            assert human_label in {0, 1}
+                            assert llm_label in {0, 1}
+                            num_agreements += swap_equal
+
+                            evaluator_name = evaluator + "@" + strategy
+                            if human_label == 0:
+                                comparison_task = ComparisonTaskLLMBar(evaluator_name, human_label, llm_label, "correct", "incorrect", 
+                                instruction, output_1, output_2, swap_equal, sub_dataset)
+                            elif human_label == 1:
+                                comparison_task = ComparisonTaskLLMBar(evaluator_name, 1-human_label, 1-llm_label, "correct", "incorrect", 
+                                instruction, output_2, output_1, swap_equal, sub_dataset)
+                            else:
+                                raise ValueError(f"Invalid human label: {human_label}")
+                            comparison_tasks.append(comparison_task)
+   
+                        print(f"Swap agreement rate for {filepath}: {num_agreements/num_entries:.4f}")
+                        if num_null_cases > 0:
+                            print("=====================================================")
+                            print(f"Number of null cases: {num_null_cases}")
+                            print(f"Number of single null cases: {num_single_null_cases}")
+                            print("=====================================================")
+
+            print(f"Number of entries in {sub_dataset}: {sub_dataset_counter[sub_dataset]}\n")
+
+        assert len(comparison_tasks) == 419 * (8 + 7) == 6285
+        data = [{
+            'task_id': task.task_id,
+            'worker_id': task.worker_id,
+            'human_label': task.human_label,
+            'llm_label': task.llm_label,
+            'generator_1': task.generator_1,
+            'generator_2': task.generator_2,
+            'instruction': task.instruction,
+            'output_1': task.output_1,
+            'output_2': task.output_2,
+            'sub_dataset': task.sub_dataset,
+            'swap_equal': task.swap_equal,
+        } for task in comparison_tasks]
+
+        os.makedirs(self.save_dir_name, exist_ok=True)
+        with open(self.pickle_path, 'wb') as f:
+            pickle.dump(data, f)
+        print(f"{self.dataset_name} data saved to local successfully.\n")
+
+        df = pd.DataFrame(data)
+        dataset = Dataset.from_pandas(df)
+        return data, df, dataset
+
 
     def process_data_hanna(self):
         """
@@ -341,13 +465,14 @@ def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writ
     return df
 
 if __name__ == "__main__":
-    writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+    loader = DatasetLoader("llmbar", None, None, load_from_pickle=False)
+    data, df, dataset = loader.process_data()
 
-    path = "SummEval/model_annotations.aligned.paired.jsonl"
-    loader = DatasetLoader("SummEval", path, writers)
-    prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories = loader.process_data()
-    print(len(prompt2Idx), len(idx2Prompt), len(prompt2Scores), len(prompt2Stories))
+    # hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
+    # dataset.push_to_hub(repo_id='llm-aes/LLMBar_GPT4_PaLM2', token=hf_write_token)
 
-    # df = push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writers, 3, "llm-aes/SummEval_original")
-
-    # print(df)
+    evaluator_set = set()
+    for entry in data:
+        evaluator_set.add(entry['worker_id'])
+    for evaluator in evaluator_set:
+        print(evaluator)

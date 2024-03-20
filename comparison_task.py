@@ -8,6 +8,9 @@ class ComparisonTask():
     task_id_initialized = False
 
     def __init__(self, model_name: str, human_eval: int | str, llm_eval: int | str, writer1: str, writer2: str, prompt: str, initial_task_id: int = 0):
+        """
+        model_name: evaluator model name.
+        """
         if not ComparisonTask.task_id_initialized:
             ComparisonTask.current_task_id = initial_task_id
             ComparisonTask.task_id_initialized = True
@@ -37,6 +40,15 @@ class ComparisonTask():
         self.generator_1 = writer1
         self.generator_2 = writer2
         self.premise = prompt
+
+class ComparisonTaskLLMBar(ComparisonTask):
+    def __init__(self, model_name: str, human_eval: int, llm_eval: int, writer1: str, writer2: str, instruction: str, output_1: str, output_2: str, swap_equal: bool, sub_dataset: str):
+        super().__init__(model_name, human_eval, llm_eval, writer1, writer2, prompt=None)
+        self.instruction = instruction
+        self.output_1 = output_1
+        self.output_2 = output_2
+        self.swap_equal = swap_equal
+        self.sub_dataset = sub_dataset
 
 class ComparisonTaskPandaLM(ComparisonTask):
     def __init__(self, model_name: str, human_eval: int, llm_eval: int, writer1: str, writer2: str, instruction: str, input: str, output_1: str, output_2: str):

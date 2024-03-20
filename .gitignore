@@ -175,5 +175,7 @@ draft.py
 data/*.pkl
 cnndm/
 df/
+LLMBar/
+llmbar01/
 
 model_annotations.aligned.jsonl

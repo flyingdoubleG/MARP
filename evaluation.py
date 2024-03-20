@@ -64,7 +64,7 @@ if __name__ == '__main__':
     model_short_name = "claude"
     model_full_name = "claude-3-haiku-20240307"
     dataset_name = "SummEval"
-    print(f"{dataset_name}, {model_full_name}, 100 sources, score only mode, double scoring\n")
+    print(f"{dataset_name}, {model_full_name}, 100 sources, analyze rate mode, double scoring\n")
 
     # evaluator = ModelEvaluator('gemini-pro', 'hanna', 'hanna/hanna_stories_annotations.csv', num_prompts_eval=2, num_categories=6, bidir_eval=True, eval_rounds=1, verbose=False, query_mode="score only", initial_task_id=30000)
 
@@ -82,9 +82,9 @@ if __name__ == '__main__':
     # df = evaluator.collect_data(hub_url="llm-aes/toy")
     # print(df)
 
-    query_modes = ["score only", "rate explain", "analyze rate"][0:1]
+    query_modes = ["score only", "rate explain", "analyze rate"][2:3]
 
-    urls = [f'llm-aes/{model_short_name}_{dataset_name}_full_score_only', f'llm-aes/{model_short_name}_{dataset_name}_full_rate_explain', f'llm-aes/{model_short_name}_{dataset_name}_full_analyze_rate'][0:1]
+    urls = [f'llm-aes/{model_short_name}_{dataset_name}_full_score_only', f'llm-aes/{model_short_name}_{dataset_name}_full_rate_explain', f'llm-aes/{model_short_name}_{dataset_name}_full_analyze_rate'][2:3]
 
     # urls = ['llm-aes/toy']
 
@@ -103,11 +103,11 @@ if __name__ == '__main__':
             # the model evaluator is initialized.
             labels_path = f"{dataset_name}_" + query_mode + "_llm_labels.pkl"
 
-            evaluator = ModelEvaluator(model_full_name, dataset_name, 'SummEval/model_annotations.aligned.paired.jsonl', num_prompts_eval=100, num_categories=4, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=0, labels_path=labels_path)
+            evaluator = ModelEvaluator(model_full_name, dataset_name, 'SummEval/model_annotations.aligned.paired.jsonl', num_prompts_eval=2, num_categories=4, bidir_eval=True, eval_rounds=1, verbose=False, query_mode=query_mode, initial_task_id=0, labels_path=labels_path)
 
             df = evaluator.collect_data(hub_url=url)
             # df = evaluator.collect_data(hub_url=None)
-            
+
             os.makedirs("df/", exist_ok=True)
             df.to_csv(f'df/{model_short_name}_{dataset_name}_full_{query_mode}.csv', index=False)
             print(df)
