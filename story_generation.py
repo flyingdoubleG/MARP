@@ -1,4 +1,5 @@
 import json
+import openai
 
 from marp.agent import Player, Writer
 from marp.backends import OpenAIChat, AutoChat
@@ -7,6 +8,7 @@ from marp.arena import Arena
 
 
 DEFAULT_MAX_TOKENS = 4096
+
 
 # BACKEND = OpenAIChat()
 # BACKEND = MistralChat(device='mps')
