@@ -60,21 +60,21 @@ class Story(Environment):
         else:
             return self.player_names[self._next_player_idx]
 
-    def get_observation(self, player_name=None) -> List[Message]:
+    def get_observation(self, player_name=None) -> Tuple[List[Message], str]:
         if player_name is None:
-            return self.scene_message_pool.get_all_messages()
+            return self.scene_message_pool.get_all_messages(), self._current_stage
         elif player_name == 'Summarizer':
             temp_message_pool = self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
                 self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
             temp_message_pool.append(self._current_act)
-            return temp_message_pool
+            return temp_message_pool, self._current_stage
         elif player_name in self._role_list:
             return self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
                 self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
-                self.character_message_pools[player_name].get_visible_messages(player_name, turn=self._current_turn)
+                self.character_message_pools[player_name].get_visible_messages(player_name, turn=self._current_turn), self._current_stage
         else:
             return self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
-                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
+                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn), self._current_stage
 
     def print(self):
         self.global_message_pool.print()

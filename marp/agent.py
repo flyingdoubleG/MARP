@@ -79,7 +79,7 @@ class Player(Agent):
             global_prompt=self.global_prompt,
         )
 
-    def act(self, observation: List[Message], stage='act') -> str:
+    def act(self, observation: List[Message], stage) -> str:
         """
         Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
 
@@ -89,21 +89,21 @@ class Player(Agent):
         Returns:
             str: The action (response) of the player.
         """
-        if stage == 'init':
+        if self.name == "Designer":
+            action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
+        elif self.name == "Global designer":
+            action_prompt = "Now please design."
+        elif self.name == 'Summarizer':
+            action_prompt = "Now please summarize."
+        elif self.name == "Controller":
+            action_prompt = "Now please select a player."
+        elif stage == 'player_init':
+            # role init
             action_prompt = "Now plan your actions in this play. Be careful and wise. This is your only chance to plan your actions, so be considerate and elaborate. Your output should follow the format of: '### My plan:\n <explanation and plan>'"
-        elif stage == 'act':
-            if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Summarizer"}:
-                action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
-            elif self.name == "Designer":
-                action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
-            elif self.name == "Global designer":
-                action_prompt = "Now please design."
-            elif self.name == 'Summarizer':
-                action_prompt = "Now please summarize."
-            elif self.name == "Controller":
-                action_prompt = "Now please select a player."
-            else:
-                action_prompt = "Now you speak and act. Please explain your actions first, and then give your words and/or actions. Your output should follow the format of: '### My plan:\n <explanation and plan>\n### My words and actions:\n <words and actions>'"
+        else:
+            # role act
+            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
+        
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,

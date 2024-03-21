@@ -56,11 +56,11 @@ class Arena:
         # pdb.set_trace()
         player_name = self.environment.get_next_player()
         player = self.name_to_player[player_name]  # get the player object
-        observation = self.environment.get_observation(player_name)  # get the observation for the player
+        observation, stage = self.environment.get_observation(player_name)  # get the observation for the player
 
         timestep = None
         for i in range(self.invalid_actions_retry):  # try to take an action for a few times
-            action = player(observation)  # take an action
+            action = player(observation, stage)  # take an action
             if self.environment.check_action(action, player_name):  # action is valid
                 timestep = self.environment.step(player_name, action)  # update the environment
                 break
