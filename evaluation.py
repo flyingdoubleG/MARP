@@ -2,7 +2,7 @@ import litellm
 from pathlib import Path
 from tqdm import tqdm
 
-from standard_prompts import *
+from marp.standard_prompts import *
 from model_evaluator import ModelEvaluator
 
 
