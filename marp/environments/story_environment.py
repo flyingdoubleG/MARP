@@ -14,10 +14,11 @@ PLAYER_TERMINAL = 'END'
 class Story(Environment):
     type_name = "Story"
 
-    def __init__(self, player_names: List[str],max_scene_turns, max_scenes, player_prompt=None, player_backend=OpenAIChat(), summarize_act=True, **kwargs):
+    def __init__(self, player_names: List[str],max_scene_turns, max_scenes, player_backend, player_prompt=None, summarize_act=True, **kwargs):
         super().__init__(player_names, **kwargs)
         self.global_message_pool = MessagePool()
         self.scene_message_pool = MessagePool()
+        self.character_message_pools = {}
         self._current_stage = "init"
         self._next_stage = "init"
         self._current_turn = 0
@@ -46,6 +47,8 @@ class Story(Environment):
     def get_next_player(self) -> str:
         if self._next_stage == "init":
             return "Global designer"
+        elif self._next_stage == "player_init":
+            return self._role_list[self._next_player_idx]
         elif self._next_stage == "scene_init":
             return "Designer"
         elif self._next_stage == "pick":
@@ -57,17 +60,21 @@ class Story(Environment):
         else:
             return self.player_names[self._next_player_idx]
 
-    def get_observation(self, player_name=None) -> List[Message]:
+    def get_observation(self, player_name=None) -> Tuple[List[Message], str]:
         if player_name is None:
-            return self.scene_message_pool.get_all_messages()
+            return self.scene_message_pool.get_all_messages(), self._current_stage
         elif player_name == 'Summarizer':
             temp_message_pool = self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
                 self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
             temp_message_pool.append(self._current_act)
-            return temp_message_pool
+            return temp_message_pool, self._current_stage
+        elif player_name in self._role_list:
+            return self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
+                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
+                self.character_message_pools[player_name].get_visible_messages(player_name, turn=self._current_turn), self._current_stage
         else:
             return self.global_message_pool.get_visible_messages(player_name, turn=self._current_turn) + \
-                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn)
+                self.scene_message_pool.get_visible_messages(player_name, turn=self._current_turn), self._current_stage
 
     def print(self):
         self.global_message_pool.print()
@@ -107,6 +114,7 @@ class Story(Environment):
         for name, desc in zip(designed_players, descs):
             player = Player(name=name, role_desc=desc + self._player_prompt, backend=self.player_backend)
             self._arena.add_player(player)
+            self.character_message_pools[name] = MessagePool()
             self._role_list.append(name)
             self.player_names.append(name)
         # return all player settings, which will be added to scene message pool
@@ -144,6 +152,11 @@ class Story(Environment):
             print(f'WARNING env manager output format error')
             return text
 
+    def _parse_player_output(self, name: str, text: str) -> str:
+        # player output format: '### My plan:\n <explanation and plan>'
+        self.character_message_pools[name].append_message(Message(agent_name=name, content=text, turn=self._current_turn))
+        return text
+
     def step(self, player_name: str, action: str) -> TimeStep:
         self._current_stage = self._next_stage
         terminal = False
@@ -151,7 +164,16 @@ class Story(Environment):
             player_descs = self._parse_global_designer_output(action)
             message = Message(agent_name=player_name, content=f'Players:\n {player_descs}', turn=self._current_turn)
             self.global_message_pool.append_message(message)
-            self._next_stage = "scene_init"
+            self._next_stage = "player_init"
+        elif self._current_stage == "player_init":
+            self._parse_player_output(player_name, action)
+            message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+            self.character_message_pools[player_name].append_message(message)
+            if self._next_player_idx < len(self._role_list) - 1:
+                self._next_stage = "player_init"
+                self._next_player_idx += 1
+            else:
+                self._next_stage = "scene_init"
         elif self._current_stage == "scene_init":
             setting, players = self._parse_designer_output(action)
             # add setting to scene message pool

@@ -3,7 +3,7 @@ import numpy as np
 import litellm
 import time
 
-from standard_prompts import *
+from marp.standard_prompts import *
 from dataset_loader import DatasetLoader
 
 

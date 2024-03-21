@@ -9,6 +9,8 @@ import asyncio
 from .backends import IntelligenceBackend, load_backend
 from .message import Message, SYSTEM_NAME
 from .config import AgentConfig, Configurable, BackendConfig
+from .standard_prompts import *
+
 from datetime import datetime
 import os
 # A special signal sent by the player to indicate that it is not possible to continue the conversation, and it requests to end the conversation.
@@ -79,8 +81,7 @@ class Player(Agent):
             global_prompt=self.global_prompt,
         )
 
-    def act(self, observation: List[Message], 
-            action_prompt="Now you speak and act") -> str:
+    def act(self, observation: List[Message], stage) -> str:
         """
         Take an action based on the observation (Generate a response), which can later be parsed to actual actions that affect the game dyanmics.
 
@@ -90,16 +91,21 @@ class Player(Agent):
         Returns:
             str: The action (response) of the player.
         """
-        if self.name not in {"Controller", "Global designer", "Designer", "Writer", "Summarizer"}:
-            action_prompt = "Now you can speak and act. please try to limit your speak and act content to be fewer than 4 sentences. Try not to repeat your your words and actions in previous scene."
-        elif self.name == "Designer":
-            action_prompt = f"Now please design Scene {self.scene_num} and make sure this scene setting is completely different from previous scene settings. Be sure to pick a player from the list given below. Your output should follow the format of <setting>\n### Next up: <character1>, <character2>, ... For example:\n\'The current scene is set in a communication room.\n### Next up: Brook, Elliot\'\n\'The current scene is set in the grand drawing room. ### Next up: Jane, George\'"
+        if self.name == "Designer":
+            action_prompt = DESIGNER_ACTION_PROMPT.format(self.scene_num)
         elif self.name == "Global designer":
-            action_prompt = "Now please design"
+            action_prompt = GLOBAL_DESIGNER_ACTION_PROMPT
         elif self.name == 'Summarizer':
-            action_prompt = "Now please summarize"
+            action_prompt = SUMMARIZER_ACTION_PROMPT
         elif self.name == "Controller":
-            action_prompt = "Now please select a player"
+            action_prompt = CONTROLLER_ACTION_PROMPT
+        elif stage == 'player_init':
+            # role init
+            action_prompt = ROLE_INIT_ACTION_PROMPT
+        else:
+            # role act
+            action_prompt = ROLE_ACT_ACTION_PROMPT
+        
         try:
             response = self.backend.query(agent_name=self.name, role_desc=self.role_desc,
                                           history_messages=observation, global_prompt=self.global_prompt,
@@ -111,9 +117,8 @@ class Player(Agent):
         self.scene_num += 1
         return response
 
-    def __call__(self, observation: List[Message], 
-                 action_prompt="Now you speak and act") -> str:
-        return self.act(observation, action_prompt)
+    def __call__(self, *args, **kwargs) -> str:
+        return self.act(*args, **kwargs)
 
     async def async_act(self, observation: List[Message]) -> str:
         """

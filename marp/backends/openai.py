@@ -8,18 +8,7 @@ from .base import IntelligenceBackend
 from ..message import Message, SYSTEM_NAME, MODERATOR_NAME
 import requests
 import json
-try:
-    import openai
-except ImportError:
-    is_openai_available = False
-    # logging.warning("openai package is not installed")
-else:
-    openai.api_key = os.environ.get("OPENAI_API_KEY")
-    if openai.api_key is None:
-        # logging.warning("OpenAI API key is not set. Please set the environment variable OPENAI_API_KEY")
-        is_openai_available = False
-    else:
-        is_openai_available = True
+from openai import OpenAI
 
 # Default config follows the OpenAI playground
 DEFAULT_TEMPERATURE = 1.1
@@ -34,7 +23,6 @@ DEFAULT_MODEL = "gpt-4-1106-preview"
 END_OF_MESSAGE = "<EOS>"  # End of message token specified by us not OpenAI
 STOP = ("<|endoftext|>", END_OF_MESSAGE)  # End of sentence token
 BASE_PROMPT = f"The messages should always end with the token {END_OF_MESSAGE}."
-
 
 class OpenAIChat(IntelligenceBackend):
     """
@@ -53,7 +41,8 @@ class OpenAIChat(IntelligenceBackend):
             model: the model to use
             merge_other_agents_as_one_user: whether to merge messages from other agents as one user message
         """
-        assert is_openai_available, "openai package is not installed or the API key is not set"
+        # assert is_openai_available, "openai package is not installed or the API key is not set"
+        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
         super().__init__(temperature=temperature, max_tokens=max_tokens, model=model,
                          merge_other_agents_as_one_user=merge_other_agents_as_one_user, **kwargs)
 
@@ -64,15 +53,13 @@ class OpenAIChat(IntelligenceBackend):
 
     @retry(stop=stop_after_attempt(1), wait=wait_random_exponential(min=1, max=60))
     def _get_response(self, messages):
-        completion = openai.ChatCompletion.create(
-            model=self.model,
-            messages=messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens,
-            stop=STOP
-        )
+        completion = self.client.chat.completions.create(model=self.model,
+        messages=messages,
+        temperature=self.temperature,
+        max_tokens=self.max_tokens,
+        stop=STOP)
 
-        response = completion.choices[0]['message']['content']
+        response = completion.choices[0].message.content
         response = response.strip()
         return response
 
