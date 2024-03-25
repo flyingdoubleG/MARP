@@ -41,6 +41,11 @@ class DatasetLoader:
             self.num_categories = 1
             self.process_data = self.process_data_llmbar
             self.pickle_path = os.path.join(self.save_dir_name, "llmbar_data.pkl")
+        elif dataset_name in {"FairEval", "LLMEval^2", "MT-Bench"}:
+            self.num_human_evaluators = 1
+            self.num_categories = 1
+            self.process_data = self.process_data_llmbar_other
+            self.pickle_path = os.path.join(self.save_dir_name, f"{dataset_name}_data.pkl")
         else:
             raise ValueError(f"Invalid dataset name: {dataset_name}")
         
@@ -81,6 +86,121 @@ class DatasetLoader:
         print(f"{self.dataset_name} data saved to local successfully.\n")
 
         return prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories
+
+    def process_data_llmbar_other(self):
+        if self.load_from_pickle and os.path.exists(self.pickle_path):
+            with open(self.pickle_path, 'rb') as f:
+                data = pickle.load(f)
+            df = pd.DataFrame(data)
+            dataset = Dataset.from_pandas(df)
+            return data, df, dataset
+
+        sub_datasets = [self.dataset_name]
+        evaluators = ["ChatGPT", "GPT-4", "LLaMA2", "PaLM2"]
+        strategies = ["Vanilla_NoRules", "Metrics_Reference"]
+        assert len(strategies) == 2
+
+        top_dir = "Processed"
+        sub_dataset_counter = {}
+        comparison_tasks = []
+        
+        for sub_dataset in sub_datasets:
+            second_dir = os.path.join(top_dir, sub_dataset, "evaluators")
+            # Counts the number of instances in each sub-dataset.
+            sub_dataset_counter[sub_dataset] = 0
+            for evaluator in evaluators:
+                third_dir = os.path.join(second_dir, evaluator)
+                for strategy in strategies:
+                    filepath = os.path.join(third_dir, strategy, "result.json")
+                    if not os.path.exists(filepath):
+                        raise ValueError(f"File does not exist: {filepath}")
+                    
+                    num_null_cases = 0
+                    num_single_null_cases = 0
+                    with open(filepath, 'r') as file:
+                        entries = json.load(file)
+                        num_entries = len(entries)
+                        if sub_dataset_counter[sub_dataset] == 0:
+                            sub_dataset_counter[sub_dataset] = num_entries
+                        elif sub_dataset_counter[sub_dataset] != num_entries:
+                            raise ValueError(f"Number of entries in {filepath} is not equal to the number of entries in the other files.")
+                        num_agreements = 0
+                        for entry in entries:
+                            instruction = entry["input"]
+                            output_1 = entry["output_1"]
+                            output_2 = entry["output_2"]
+                            # The human label is 0 if the first output is correct, and 1 if the second output is correct.
+                            human_label = entry["label"] - 1
+                            result_1 = entry["results"][-1]["swap = False"]["winner"]
+                            result_2 = entry["results"][-1]["swap = True"]["winner"]
+
+                            if result_1 is None or result_2 is None:
+                                num_null_cases += 1
+                                if result_1 is None and result_2 is not None:
+                                    num_single_null_cases += 1
+                                    llm_label = int(result_2) - 1
+                                    swap_equal = False
+                                elif result_1 is not None and result_2 is None:
+                                    num_single_null_cases += 1
+                                    llm_label = int(result_1) - 1
+                                    swap_equal = False
+                                else:
+                                    llm_label = 0
+                                    swap_equal = False
+                            else:
+                                result_1 = int(result_1)
+                                result_2 = int(result_2)
+                                llm_label = result_1 - 1
+                                swap_equal = (result_1 == result_2)
+
+                            assert human_label in {0, 1}
+                            assert llm_label in {0, 1}
+                            num_agreements += swap_equal
+
+                            evaluator_name = evaluator + "@" + strategy
+                            if human_label == 0:
+                                comparison_task = ComparisonTaskLLMBar(evaluator_name, human_label, llm_label, "correct", "incorrect", 
+                                instruction, output_1, output_2, swap_equal, sub_dataset)
+                            elif human_label == 1:
+                                comparison_task = ComparisonTaskLLMBar(evaluator_name, 1-human_label, 1-llm_label, "correct", "incorrect", 
+                                instruction, output_2, output_1, swap_equal, sub_dataset)
+                            else:
+                                raise ValueError(f"Invalid human label: {human_label}")
+                            comparison_tasks.append(comparison_task)
+   
+                        print(f"Swap agreement rate for {filepath}: {num_agreements/num_entries:.4f}")
+                        if num_null_cases > 0:
+                            print("=====================================================")
+                            print(f"Number of null cases: {num_null_cases}")
+                            print(f"Number of single null cases: {num_single_null_cases}")
+                            print("=====================================================")
+
+            print(f"Number of entries in {sub_dataset}: {sub_dataset_counter[sub_dataset]}\n")
+
+        num_instances = {"FairEval": 66, "LLMEval^2": 200, "MT-Bench": 200}
+        assert len(comparison_tasks) == num_instances[self.dataset_name] * 8
+        data = [{
+            'task_id': task.task_id,
+            'worker_id': task.worker_id,
+            'human_label': task.human_label,
+            'llm_label': task.llm_label,
+            'generator_1': task.generator_1,
+            'generator_2': task.generator_2,
+            'instruction': task.instruction,
+            'output_1': task.output_1,
+            'output_2': task.output_2,
+            'sub_dataset': task.sub_dataset,
+            'swap_equal': task.swap_equal,
+        } for task in comparison_tasks]
+
+        os.makedirs(self.save_dir_name, exist_ok=True)
+        with open(self.pickle_path, 'wb') as f:
+            pickle.dump(data, f)
+        print(f"{self.dataset_name} data saved to local successfully.\n")
+
+        df = pd.DataFrame(data)
+        dataset = Dataset.from_pandas(df)
+        return data, df, dataset
     
     def process_data_llmbar(self):
         if self.load_from_pickle and os.path.exists(self.pickle_path):
@@ -465,14 +585,30 @@ def push_data_to_hub(prompt2Idx, idx2Prompt, prompt2Scores, prompt2Stories, writ
     return df
 
 if __name__ == "__main__":
-    loader = DatasetLoader("llmbar", None, None, load_from_pickle=False)
+    dataset_name = "MT-Bench"
+    loader = DatasetLoader(dataset_name, None, None, load_from_pickle=False)
     data, df, dataset = loader.process_data()
 
     # hf_write_token = os.getenv('HUGGINGFACE_WRITE_TOKEN')
-    # dataset.push_to_hub(repo_id='llm-aes/LLMBar_GPT4_PaLM2', token=hf_write_token)
+    # dataset.push_to_hub(repo_id=f'llm-aes/{dataset_name}_Evaluated', token=hf_write_token)
+    # dataset.push_to_hub(repo_id=f'llm-aes/LLMEval2_Evaluated', token=hf_write_token)
 
-    evaluator_set = set()
-    for entry in data:
-        evaluator_set.add(entry['worker_id'])
-    for evaluator in evaluator_set:
-        print(evaluator)
+    # subsets = ["FairEval", "LLMEval^2", "MT-Bench"]
+    # data = {}
+    # instructions = {}
+    # for subset in subsets:
+    #     loader = DatasetLoader(subset, None, None, load_from_pickle=True)
+    #     data[subset], _, _ = loader.process_data()
+    #     instructions[subset] = set()
+    #     for task in data[subset]:
+    #         instructions[subset].add(task['instruction'].strip())
+    
+    # for subset1 in subsets:
+    #     for subset2 in subsets:
+    #         # Print the number of repeated instances between the two datasets.
+    #         if subset1 != subset2:
+    #             num_repeats = 0
+    #             for instruction in instructions[subset1]:
+    #                 if instruction in instructions[subset2]:
+    #                     num_repeats += 1
+    #             print(f"Number of repeated instances between {subset1} and {subset2}: {num_repeats}")
