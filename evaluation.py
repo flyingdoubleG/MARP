@@ -3,6 +3,7 @@ from pathlib import Path
 from tqdm import tqdm
 import os
 import sys
+import traceback
 
 from standard_prompts import *
 from model_evaluator import ModelEvaluator
@@ -97,7 +98,7 @@ if __name__ == '__main__':
                 continue
 
             print("=====================================================")
-            print(f"SummEval, query mode: {query_mode}")
+            print(f"{dataset_name}, query mode: {query_mode}")
             print("=====================================================")
             # Note that labels_path will be automatically joined with "data" once 
             # the model evaluator is initialized.
@@ -112,7 +113,9 @@ if __name__ == '__main__':
             df.to_csv(f'df/{model_short_name}_{dataset_name}_full_{query_mode}.csv', index=False)
             print(df)
             print("\n")
-    except:
+    except Exception as e:
+        print("An exception occurred: ", e)
+        traceback.print_exc()
         sys.exit(1)
 
     # print("=====================================================")

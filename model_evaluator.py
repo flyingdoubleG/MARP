@@ -77,6 +77,8 @@ class ModelEvaluator():
         self.initial_task_id = initial_task_id
         self.labels_path = os.path.join("data", labels_path)
         self.prev_save_time = time.time()
+        self.writers1 = None
+        self.writers2 = None
 
         if os.path.exists(self.labels_path):
             with open(self.labels_path, 'rb') as file:
@@ -609,6 +611,9 @@ class ModelEvaluator():
 
         writers = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
 
+        self.writers1 = ["GPT-2"]
+        self.writers2 = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "BART", "Pegasus"]
+
         self.load_llm_labels(writers, prompt2Idx)
 
         return writers, train_set, test_set
@@ -623,11 +628,22 @@ class ModelEvaluator():
         acc = 0
         acc_count = 0
         prompts = list(trainPrompt2Idx.keys())[:self.num_prompts_eval]
+
+        if self.writers1 is None:
+            self.writers1 = writers
+            assert self.writers2 is None
+            self.writers2 = writers
+        else:
+            assert self.writers2 is not None
         
-        for i in range(len(writers)):
-            writer1 = writers[i]
-            for j in range(i+1, len(writers)):
-                writer2 = writers[j]
+        for i in range(len(self.writers1)):
+            writer1 = self.writers1[i]
+            if self.writers1 == self.writers2:
+                start_idx = i + 1
+            else:
+                start_idx = 0
+            for j in range(start_idx, len(self.writers2)):
+                writer2 = self.writers2[j]
                 premises = []
                 scores1 = []
                 scores2 = []
@@ -665,11 +681,16 @@ class ModelEvaluator():
         self.labels_path = os.path.join("data", "full_" + self.labels_path.split("/")[-1])
         with open(self.labels_path, 'wb') as file:
             pickle.dump(self.llm_labels, file)
-        print(f"\nSaved self.llm_labels to {self.labels_path}")    
+        print(f"\nSaved self.llm_labels to {self.labels_path}")   
+
+        if self.writers1 == self.writers2:
+            assert acc_count == len(writers) * (len(writers) - 1) / 2
+        else:
+            assert acc_count == len(self.writers1) * len(self.writers2) 
         
-        acc /= (len(writers) * (len(writers) - 1) / 2)
+        acc /= acc_count
         print(f"\nOverall Train Accuracy: {acc}")
-        assert acc_count == len(writers) * (len(writers) - 1) / 2
+
         return f"Overall Train Accuracy: {acc}", comparison_tasks
 
     @staticmethod
