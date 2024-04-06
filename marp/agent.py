@@ -99,6 +99,8 @@ class Player(Agent):
             action_prompt = SUMMARIZER_ACTION_PROMPT
         elif self.name == "Controller":
             action_prompt = CONTROLLER_ACTION_PROMPT
+        elif self.name == "Reader":
+            action_prompt = READER_ACTION_PROMPT
         elif stage == 'player_init':
             # role init
             action_prompt = ROLE_INIT_ACTION_PROMPT

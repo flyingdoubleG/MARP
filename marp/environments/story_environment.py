@@ -20,7 +20,7 @@ class Story(Environment):
         self.scene_message_pool = MessagePool()
         self.character_message_pools = {}
         self._current_stage = "init"
-        self._next_stage = "init"
+        self._next_stage = "player_init"
         self._current_turn = 0
         self._current_scene = 0
         self._max_scene_turns = max_scene_turns
@@ -39,24 +39,26 @@ class Story(Environment):
 
     def reset(self):
         self._current_stage = "init"
-        self._next_stage = "init"
+        self._next_stage = "player_init"
         self._current_turn = 0
         self.global_message_pool.reset()
         self.scene_message_pool.reset()
 
     def get_next_player(self) -> str:
-        if self._next_stage == "init":
+        if self._current_stage == "init":
             return "Global designer"
-        elif self._next_stage == "player_init":
+        elif self._current_stage == "player_init":
             return self._role_list[self._next_player_idx]
-        elif self._next_stage == "scene_init":
+        elif self._current_stage == "scene_init":
             return "Designer"
-        elif self._next_stage == "pick":
+        elif self._current_stage == "pick":
             return "Controller"
-        elif self._next_stage == "impact":
+        elif self._current_stage == "impact":
             return "Summarizer"
-        elif self._next_stage == "end of scene":
+        elif self._current_stage == "end of scene":
             return "Writer"
+        elif self._current_stage == "review":
+            return "Reader"
         else:
             return self.player_names[self._next_player_idx]
 
@@ -158,14 +160,13 @@ class Story(Environment):
         return text
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        self._current_stage = self._next_stage
         terminal = False
-        if self._current_stage == "init":
+        if self._current_stage == "init": # global designer
             player_descs = self._parse_global_designer_output(action)
             message = Message(agent_name=player_name, content=f'Players:\n {player_descs}', turn=self._current_turn)
             self.global_message_pool.append_message(message)
             self._next_stage = "player_init"
-        elif self._current_stage == "player_init":
+        elif self._current_stage == "player_init": # player
             self._parse_player_output(player_name, action)
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.character_message_pools[player_name].append_message(message)
@@ -174,7 +175,7 @@ class Story(Environment):
                 self._next_player_idx += 1
             else:
                 self._next_stage = "scene_init"
-        elif self._current_stage == "scene_init":
+        elif self._current_stage == "scene_init": # designer
             setting, players = self._parse_designer_output(action)
             # add setting to scene message pool
             message = Message(agent_name=player_name, content=setting, turn=self._current_turn)
@@ -185,7 +186,7 @@ class Story(Environment):
             self.scene_message_pool.append_message(message)
             self._scene_start = self._current_turn
             self._next_stage = "pick"
-        elif self._current_stage == "pick":
+        elif self._current_stage == "pick": # controller
             next_player = self._parse_picked_player(action)
             # controller says PLAYER_TERMINAL or max_scene_turns is reached
             if next_player == PLAYER_TERMINAL or self._current_turn - self._scene_start >= self._max_scene_turns:
@@ -193,7 +194,7 @@ class Story(Environment):
             else:
                 self._next_player_idx = self.player_names.index(next_player)
                 self._next_stage = "act"
-        elif self._current_stage == "act":
+        elif self._current_stage == "act": # player
             if self._summarize_act:
                 self._current_act = Message(agent_name=player_name, content=f'The act you summarize: [{player_name}]: {action}', turn=self._current_turn)
                 self._next_stage = "impact"
@@ -201,19 +202,24 @@ class Story(Environment):
                 message = Message(agent_name=player_name, content=action, turn=self._current_turn)
                 self.scene_message_pool.append_message(message)
                 self._next_stage = "pick"
-        elif self._current_stage == "impact":
+        elif self._current_stage == "impact": # summarizer
             self._next_stage = "pick"
             action = self._parse_env_manager_output(action)
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.scene_message_pool.append_message(message)
-        elif self._current_stage == "end of scene":
+        elif self._current_stage == "end of scene": # writer
             message = Message(agent_name=player_name, content=action, turn=self._current_turn)
             self.global_message_pool.append_message(message)
             self._current_scene += 1
+            self._next_stage = "review"
+        elif self._current_stage == "review": # reader
+            message = Message(agent_name=player_name, content=action, turn=self._current_turn)
+            self.global_message_pool.append_message(message)
             self._next_stage = "scene_init"
         terminal = terminal or self.is_terminal()
         timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=terminal)
         self._current_turn += 1  # update current_turn every step
+        self._current_stage = self._next_stage
         return timestep
 
     def check_action(self, action: str, player_name: str) -> bool:

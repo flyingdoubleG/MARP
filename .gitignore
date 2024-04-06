@@ -167,3 +167,5 @@ etc/
 storys/
 # hanna/
 out.txt
+
+litellm_uuid.txt
