@@ -11,10 +11,10 @@ from marp.standard_prompts import *
 DEFAULT_MAX_TOKENS = 4096
 
 
-# BACKEND = OpenAIChat()
+BACKEND = OpenAIChat()
 # BACKEND = MistralChat(device='mps')
 # BACKEND = AutoChat(model='anyscale/mistralai/Mistral-7B-Instruct-v0.1')
-BACKEND = AutoChat(model='gemini-pro', temperature=0.8)
+# BACKEND = AutoChat(model='gemini-pro', temperature=0.8)
 
 # environment_description = QUARREL_PREMISE
 environment_description = IBRUSIA_PREMISE
@@ -33,8 +33,10 @@ writer = Writer(name="Writer", backend=BACKEND,
 env_manager = Player(name="Summarizer", backend=BACKEND,
                      role_desc=ENV_MANAGER_PROMPT,
                      global_prompt= environment_description)
-
-players = [controller, global_designer, designer, writer, env_manager]
+reader = Player(name="Reader", backend=BACKEND,
+                role_desc=READER_PROMPT,
+                global_prompt= environment_description)
+players = [controller, global_designer, designer, writer, env_manager, reader]
 
 env = Story(player_names=[p.name for p in players], max_scene_turns=10, max_scenes=5, player_backend=BACKEND, player_prompt=PLAYER_PROMPT, summarize_act=False)
 # arena = Arena.from_config('story_generation.json')
