@@ -20,7 +20,7 @@ class Story(Environment):
         self.scene_message_pool = MessagePool()
         self.character_message_pools = {}
         self._current_stage = "init"
-        self._next_stage = "init"
+        self._next_stage = "player_init"
         self._current_turn = 0
         self._current_scene = 0
         self._max_scene_turns = max_scene_turns
@@ -39,25 +39,25 @@ class Story(Environment):
 
     def reset(self):
         self._current_stage = "init"
-        self._next_stage = "init"
+        self._next_stage = "player_init"
         self._current_turn = 0
         self.global_message_pool.reset()
         self.scene_message_pool.reset()
 
     def get_next_player(self) -> str:
-        if self._next_stage == "init":
+        if self._current_stage == "init":
             return "Global designer"
-        elif self._next_stage == "player_init":
+        elif self._current_stage == "player_init":
             return self._role_list[self._next_player_idx]
-        elif self._next_stage == "scene_init":
+        elif self._current_stage == "scene_init":
             return "Designer"
-        elif self._next_stage == "pick":
+        elif self._current_stage == "pick":
             return "Controller"
-        elif self._next_stage == "impact":
+        elif self._current_stage == "impact":
             return "Summarizer"
-        elif self._next_stage == "end of scene":
+        elif self._current_stage == "end of scene":
             return "Writer"
-        elif self._next_stage == "review":
+        elif self._current_stage == "review":
             return "Reader"
         else:
             return self.player_names[self._next_player_idx]
@@ -160,7 +160,6 @@ class Story(Environment):
         return text
 
     def step(self, player_name: str, action: str) -> TimeStep:
-        self._current_stage = self._next_stage
         terminal = False
         if self._current_stage == "init": # global designer
             player_descs = self._parse_global_designer_output(action)
@@ -220,6 +219,7 @@ class Story(Environment):
         terminal = terminal or self.is_terminal()
         timestep = TimeStep(observation=self.get_observation(), reward=self.get_zero_rewards(), terminal=terminal)
         self._current_turn += 1  # update current_turn every step
+        self._current_stage = self._next_stage
         return timestep
 
     def check_action(self, action: str, player_name: str) -> bool:
