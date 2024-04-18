@@ -1,0 +1,151 @@
+hanna:
+96 premises, 11 generators (including human)
+
+generators = ["Human", "BertGeneration", "CTRL", "GPT", "GPT-2 (tag)", "GPT-2", "RoBERTa", "XLNet", "Fusion", "HINT", "TD-VAE"]
+
+Number of evaluators: 6
+w_gemini-pro-score-only, w_gemini-pro-analyze-rate, w_gemini-pro-rate-explain
+
+w_gpt-3.5-turbo-0125, w_gpt-3.5-turbo-0125-analyze-rate, w_gpt3.5_rate_explain
+
+task_id: 0 -> 1999
+
+
+======================================================================
+meva:
+200 premises, 5 generators
+
+generators = ["gpt", "plan_write", "s2s", "gpt_kg", "fusion"]
+
+Number of evaluators: 6
+	gpt-3.5-turbo: score only, analyze rate, rate explain
+	gemini: score only, analyze rate, rate explain
+
+task_id: 0 -> 5279
+
+======================================================================
+SummEval:
+100 premises, 16 generators
+
+generators = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+
+Number of evaluators: 4
+'w_gemini-pro-analyze-rate', 'w_gpt-3.5-turbo-0125-score-only', 'w_gemini-pro-rate-explain', 'w_gemini-pro-score-only'
+
+task_id: 0 -> 11999
+
+
+======================================================================
+llmbar:
+419 instructions, 2 generators (correct vs. incorrect)
+
+Number of evaluators: 15
+
+w_GPT-4@Vanilla_NoRules
+w_GPT-4@Vanilla
+w_GPT-4@Swap
+w_GPT-4@CoT
+w_GPT-4@Swap_CoT
+w_GPT-4@Metrics
+w_GPT-4@Reference
+w_GPT-4@Metrics_Reference
+
+w_PaLM2@Vanilla_NoRules
+w_PaLM2@Vanilla
+w_PaLM2@Swap
+w_PaLM2@Swap_CoT
+w_PaLM2@Metrics
+w_PaLM2@Reference
+w_PaLM2@Metrics_Reference
+
+
+task_id: 0 -> 418
+
+
+======================================================================
+FairEval 
+LLMEval^2
+MT-Bench
+
+66 instructions
+200 instructions
+75 instructions
+
+66 tasks
+200 tasks
+195 tasks
+
+task_id: 
+0 -> 65
+0 -> 199
+0 -> 194
+
+Number of evaluators: 8
+'w_LLaMA2@Metrics_Reference', 
+'w_LLaMA2@Vanilla_NoRules', 
+'w_PaLM2@Metrics_Reference', 
+'w_ChatGPT@Metrics_Reference', 
+'w_ChatGPT@Vanilla_NoRules', 
+'w_GPT-4@Metrics_Reference', 
+'w_GPT-4@Vanilla_NoRules', 
+'w_PaLM2@Vanilla_NoRules'
+
+
+======================================================================
+SummEval (GPT2 vs. Others):
+100 premises, 16 generators
+
+generators = ["LEAD-3", "NEUSUM", "BanditSum", "RNES", "Point Generator", "Fast-abs-rl", "Bottom-Up", "Improve-abs", "Unified-ext-abs", "ROUGESal", "Multi-task", "Closed book decoder", "T5", "GPT-2", "BART", "Pegasus"]
+
+Number of evaluators: 6
+'w_gemini-pro-analyze-rate', 
+'w_gemini-pro-score-only', 
+'w_gemini-pro-rate-explain', 
+'w_gpt-3.5-turbo-0125-analyze-rate', 
+'w_gpt-3.5-turbo-0125-score-only', 
+'w_gpt-3.5-turbo-0125-rate-explain'
+
+task_id: 0 -> 1499
+
+
+======================================================================
+PandaLM
+Number of unique instructions: 158
+Number of unique inputs: 130
+Number of unique instruction-input pairs: 158
+
+Number of tasks: 894
+task_id: 0 -> 893
+
+Each task uniquely corresponds to an (instruction, input, generator_1, generator_2) tuple.
+
+Number of generators: 5
+{'cerebras-gpt-6.7B', 'llama-7b', 'bloom-7b', 'opt-7b', 'pythia-6.9b'}
+
+Number of evaluators: 8
+{'gpt4_2', 'gemini_2', 'gemini_1', 'gemini_3', 'chatgpt_2', 'chatgpt_3', 'chatgpt_1', 'gemini_4'}
+
+
+10 generator pairs:
+('bloom-7b', 'cerebras-gpt-6.7B') -> 89 tasks
+('bloom-7b', 'llama-7b') -> 100 tasks
+('bloom-7b', 'opt-7b')  -> 78 tasks
+('bloom-7b', 'pythia-6.9b') -> 96 tasks
+
+('cerebras-gpt-6.7B', 'llama-7b') -> 104 tasks
+('cerebras-gpt-6.7B', 'opt-7b') -> 82 tasks
+('cerebras-gpt-6.7B', 'pythia-6.9b') -> 80 tasks
+
+('llama-7b', 'opt-7b') -> 95 tasks
+('llama-7b', 'pythia-6.9b') -> 85 tasks
+
+('opt-7b', 'pythia-6.9b') -> 85 tasks
+
+
+Number of evaluators per task histogram in the form of 
+{number of evaluators: number of tasks}:
+{7: 15; 8: 879}
+
+
+
+
